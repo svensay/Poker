@@ -10,6 +10,7 @@ type comb = QuinteFlush of rang
 	    | Suite of rang
 	    | Brelan of rang*rang*rang
 	    | DoublePaire of rang*rang*rang (*1er rang -> 1er paire, 2éme rang -> 2éme paire, 3éme -> derniére carte*)
+		
 	    | Paire of rang*rang*rang*rang(*1er rang -> 1er paire, le reste des rangs sont les cartes qu'on compare en cas d'égalité*)
 	    | CarteHaute of rang*rang*rang*rang*rang(*Compare la meilleur rang et en cas d'égalité on regarde la prochaine plus forte et ainci de suite*);;
 
@@ -44,6 +45,16 @@ let compare_comb c1 c2 =
   else compare_comb_equals c1 c2
 ;;
 
+
+let list_card d t =
+  let l = [] in
+  match d with
+    | Main (c1,c2) -> match t with
+	| Flop (c3,c4,c5) -> (c1::(c2::(c3::(c4::(c5::l)))))
+	| Turn (c3,c4,c5,c6) -> (c1::(c2::(c3::(c4::(c5::(c6::l))))))
+	| River (c3,c4,c5,c6,c7) -> (c1::(c2::(c3::(c4::(c5::(c6::(c7::l)))))))
+;;
+
 (*Pas fini*)
 let compute_comb d t =
   let l = Array.make 13 0
@@ -56,24 +67,16 @@ let compute_comb d t =
     match c with
       | [] -> ()
       | h::tl -> match h with
-	  | Carte (rank,_) -> t.(rank) <- t.(rank)+1;
-	  | Carte (_,color) -> match color with
-	      | Pique -> pique.(rank) <- true;aux tl 
-	      | Coeur -> coeur.(rank) <- true;aux tl
-	      | Carreau -> carreau.(rank) <- true; aux tl
-	      | Trefle -> trefle.(rank) <- true;aux tl
+	  | Carte ((rank:rang),color) -> match rank with
+	      | Valeur v -> l.(v) <- l.(v)+1;
+	    match color with
+	      | Pique -> pique.(v) <- true;aux tl 
+	      | Coeur -> coeur.(v) <- true;aux tl
+	      | Carreau -> carreau.(v) <- true; aux tl
+	      | Trefle -> trefle.(v) <- true;aux tl
   in aux card;
-  
 ;;
 
-let list_card d t =
-  let l = [] in
-  match d with
-    | Main (c1,c2) -> match t with
-	| Flop (c3,c4,c5) -> (c1::(c2::(c3::(c4::(c5::l)))))
-	| Turn (c3,c4,c5,c6) -> (c1::(c2::(c3::(c4::(c5::(c6::l))))))
-	| River (c3,c4,c5,c6,c7) -> (c1::(c2::(c3::(c4::(c5::(c6::(c7::l)))))))
-;;
 
 let test1 = QuinteFlush(Valeur(10));;
 let test2 = QuinteFlush(Valeur(9));;
