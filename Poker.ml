@@ -15,16 +15,32 @@ type comb = QuinteFlush of rang
 
 let compare_hands d1 d2 t = ;;
 
-let compare_comb c1 c2 = match c1 with
-  | QuinteFlush r -> print_endline("QuinteFlush")
-  | Carre (r1,r2) -> print_endline("Carre")
-  | Full  (r1,r2) ->  print_endline("Full")
-  | Couleur (r1,r2,r3,r4,r5) -> print_endline("Couleur")
-  | Suite r -> print_endline("Suite")
-  | Brelan (r1,r2,r3) ->  print_endline("Brelan")
-  | DoublePaire (r1,r2,r3) ->  print_endline("DoublePaire")
-  | Paire (r1,r2,r3,r4) -> print_endline("Paire")
-  | CarteHaute (r1,r2,r3,r4,r5) -> print_endline("CarteHaute")
+let valeur_comb c = match c with
+  | QuinteFlush r -> print_endline("QuinteFlush"); 9
+  | Carre (r1,r2) -> print_endline("Carre"); 8
+  | Full  (r1,r2) ->  print_endline("Full"); 7
+  | Couleur (r1,r2,r3,r4,r5) -> print_endline("Couleur"); 6
+  | Suite r -> print_endline("Suite"); 5
+  | Brelan (r1,r2,r3) ->  print_endline("Brelan"); 4
+  | DoublePaire (r1,r2,r3) ->  print_endline("DoublePaire"); 3
+  | Paire (r1,r2,r3,r4) -> print_endline("Paire"); 2
+  | CarteHaute (r1,r2,r3,r4,r5) -> print_endline("CarteHaute"); 1
+;;
+
+
+(* WTF *)
+(* Compare deux combinaisons "du même type" *)
+let compare_comb_equals c1 c2 = match c1, c2 with
+	| (QuinteFlush r), (QuinteFlush r2) = if r > r2 then 1
+									  else if r < r2 then -1
+									  else 0
+	| _ -> 2
+;;
+
+let compare_comb c1 c2 =
+	if valeur_comb c1 > valeur_comb c2 then 1
+	else if valeur_comb c2 > valeur_comb c1 then -1
+	else compare_comb_equals c1 c2
 ;;
 
 let compute_comb d t = ;;
