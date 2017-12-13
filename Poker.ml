@@ -43,10 +43,32 @@ let compare_comb c1 c2 =
 	else compare_comb_equals c1 c2
 ;;
 
-let compute_comb d t = ;;
+(*Pas fini*)
+let compute_comb d t =
+  let l = Array.make 13 0
+  and coeur = Array.make 13 false
+  and pique = Array.make 13 false
+  and trefle = Array.make 13 false
+  and carreau = Array.make 13 false
+  and card = list_card d t 
+  and let rec aux c =
+  match c with
+  |[] -> ()
+  |h::tl -> match h with
+            |
+;;
+
+let list_card d t =
+  let l = [] in
+  match d with
+  | Main (c1,c2) -> match t with
+             | Flop (c3,c4,c5) -> (c1::(c2::(c3::(c4::(c5::l)))))
+             | Turn (c3,c4,c5,c6) -> (c1::(c2::(c3::(c4::(c5::(c6::l))))))
+             | River (c3,c4,c5,c6,c7) -> (c1::(c2::(c3::(c4::(c5::(c6::(c7::l)))))))
+;;
   
 let test1 = QuinteFlush(Valeur(10));;
-let test2 =  QuinteFlush(Valeur(9));;
+let test2 = QuinteFlush(Valeur(9));;
 
 compare_comb test1 test2;;  
              
