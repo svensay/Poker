@@ -52,6 +52,16 @@ let list_card d t =
         | River (c3,c4,c5,c6,c7) -> (c1::(c2::(c3::(c4::(c5::(c6::(c7::l)))))))
 ;;
 
+(*retourne la liste des rank*)
+let list_rank tab_rang =
+  let rec aux i l =
+    if i < 0 then l
+    else match tab_rang.(i) with
+      | 0 -> aux (i-1) l
+      | _ -> aux (i-1) (Valeur(i+1)::l)
+  in aux 12 []
+;;
+
 let compute_comb d t =
   let l = Array.make 13 0
   and coeur = Array.make 13 false
@@ -59,18 +69,18 @@ let compute_comb d t =
   and trefle = Array.make 13 false
   and carreau = Array.make 13 false
   and card = list_card d t in
-  let rec aux c =
+  let rec count c =
     match c with
       | [] -> ()
       | h::tl -> match h with
 	  | Carte ((rank:rang),color) -> match rank with
 	      | Valeur v -> l.(v-1) <- l.(v-1)+1;
 	    match color with
-	      | Pique -> pique.(v-1) <- true;aux tl 
-	      | Coeur -> coeur.(v-1) <- true;aux tl
-	      | Carreau -> carreau.(v-1) <- true; aux tl
-	      | Trefle -> trefle.(v-1) <- true;aux tl
-  in aux card;
+	      | Pique -> pique.(v-1) <- true;count tl 
+	      | Coeur -> coeur.(v-1) <- true;count tl
+	      | Carreau -> carreau.(v-1) <- true;count tl
+	      | Trefle -> trefle.(v-1) <- true;count tl
+  in count card;
   let rec list_comb i lc =
     if i < 0 then lc
     else match l.(i) with
