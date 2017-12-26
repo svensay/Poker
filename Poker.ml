@@ -46,6 +46,7 @@ let compare_comb c1 c2 =
 ;;
 
 
+
 let list_card d t =
   let l = [] in
   match d with
@@ -55,7 +56,6 @@ let list_card d t =
 	| River (c3,c4,c5,c6,c7) -> (c1::(c2::(c3::(c4::(c5::(c6::(c7::l)))))))
 ;;
 
-(*Pas fini*)
 let compute_comb d t =
   let l = Array.make 13 0
   and coeur = Array.make 13 false
@@ -68,18 +68,32 @@ let compute_comb d t =
       | [] -> ()
       | h::tl -> match h with
 	  | Carte ((rank:rang),color) -> match rank with
-	      | Valeur v -> l.(v) <- l.(v)+1;
+	      | Valeur v -> l.(v-1) <- l.(v-1)+1;
 	    match color with
-	      | Pique -> pique.(v) <- true;aux tl 
-	      | Coeur -> coeur.(v) <- true;aux tl
-	      | Carreau -> carreau.(v) <- true; aux tl
-	      | Trefle -> trefle.(v) <- true;aux tl
+	      | Pique -> pique.(v-1) <- true;aux tl 
+	      | Coeur -> coeur.(v-1) <- true;aux tl
+	      | Carreau -> carreau.(v-1) <- true; aux tl
+	      | Trefle -> trefle.(v-1) <- true;aux tl
   in aux card;
+  let rec list_comb i lc =
+    if i < 0 then lc
+    else match l.(i) with
+      | 0 -> list_comb (i-1) lc
+      | 1 -> list_comb (i-1) (Suite(Valeur(5))::lc)
+      | 2 -> list_comb (i-1) (Suite(Valeur(5))::lc)
+      | 3 -> list_comb (i-1) (Suite(Valeur(5))::lc)
+      | 4 -> list_comb (i-1) (Suite(Valeur(5))::lc)
+      | _ -> failwith("Pas possible")
+  in list_comb 12 []
 ;;
 
 
 let test1 = QuinteFlush(Valeur(10));;
 let test2 = QuinteFlush(Valeur(9));;
+let main = Main(Carte(Valeur(13),Pique),Carte(Valeur(7),Coeur));;
+let table = River(Carte(Valeur(9),Pique),Carte(Valeur(10),Carreau),Carte(Valeur(11),Trefle),Carte(Valeur(8),Coeur),Carte(Valeur(2),Pique));;
+
+compute_comb main table;;
 
 compare_comb test1 test2;;  
 
