@@ -37,7 +37,32 @@ let valeur_comb c = match c with
   | CarteHaute (r1,r2,r3,r4,r5) -> print_endline("CarteHaute"); 1
 ;;
 
+let print_card (card:carte) = match card with
+  (r, c) -> print_int(r); print_newline ();
+             match c with
+             | Pique -> print_endline "Pique"
+             | Coeur -> print_endline "Coeur"
+             | Carreau -> print_endline "Carreau"
+             | Trefle -> print_endline "Trefle"
+;;
+
+let print_comb c = 
+  print_endline("DEBUT PRINT COMB");
+  match c with
+  | QuinteFlush r -> print_card r;
+  | Carre (r1,r2) -> print_card r1; print_card r2;
+  | Full  (r1,r2) ->  print_card r1; print_card r2;
+  | Couleur (r1,r2,r3,r4,r5) -> print_card r;
+  | Suite r -> print_card r;
+  | Brelan (r1,r2,r3) ->  print_card r1; print_card r2; print_card r3;
+  | DoublePaire (r1,r2,r3) ->  print_card r1; print_card r2; print_card r3;
+  | Paire (r1,r2,r3,r4) -> print_card r1; print_card r2; print_card r3; print_card r4;
+  | CarteHaute (r1,r2,r3,r4,r5) -> print_card r1; print_card r2; print_card r3; print_card r4; print_card r5;
+  print_endline("FIN PRINT COMB");
+;;
+
 let compare_comb c1 c2 =
+        print_comb c1; print_comb c2;
         if valeur_comb c1 > valeur_comb c2 then 1
         else if valeur_comb c2 > valeur_comb c1 then -1
         else compare_comb_equals c1 c2
@@ -110,10 +135,11 @@ let compare_hands d1 d2 t =
 
 let test1 = QuinteFlush(Valeur(10));;
 let test2 = QuinteFlush(Valeur(9));;
-let main = Main(Carte(Valeur(13),Pique),Carte(Valeur(7),Coeur));;
+let main1 = Main(Carte(Valeur(13),Pique),Carte(Valeur(7),Coeur));;
+let main2 = Main(Carte(Valeur(13),Pique),Carte(Valeur(7),Coeur));;
 let table = River(Carte(Valeur(9),Pique),Carte(Valeur(10),Carreau),Carte(Valeur(11),Trefle),Carte(Valeur(8),Coeur),Carte(Valeur(2),Pique));;
 
-compute_comb main table;;
+let a = compute_comb main table;;
 
 compare_comb test1 test2;;  
-
+let b = compare_hands main1 main2 table;;
