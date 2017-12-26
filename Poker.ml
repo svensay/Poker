@@ -37,27 +37,22 @@ let valeur_comb c = match c with
   | CarteHaute (r1,r2,r3,r4,r5) -> print_endline("CarteHaute"); 1
 ;;
 
-let print_card (card:carte) = match card with
-  (r, c) -> print_int(r); print_newline ();
-             match c with
-             | Pique -> print_endline "Pique"
-             | Coeur -> print_endline "Coeur"
-             | Carreau -> print_endline "Carreau"
-             | Trefle -> print_endline "Trefle"
+let print_rang (r:rang) = match r with
+  Valeur i -> print_int(i); print_newline ();
 ;;
 
 let print_comb c = 
   print_endline("DEBUT PRINT COMB");
   match c with
-  | QuinteFlush r -> print_card r;
-  | Carre (r1,r2) -> print_card r1; print_card r2;
-  | Full  (r1,r2) ->  print_card r1; print_card r2;
-  | Couleur (r1,r2,r3,r4,r5) -> print_card r;
-  | Suite r -> print_card r;
-  | Brelan (r1,r2,r3) ->  print_card r1; print_card r2; print_card r3;
-  | DoublePaire (r1,r2,r3) ->  print_card r1; print_card r2; print_card r3;
-  | Paire (r1,r2,r3,r4) -> print_card r1; print_card r2; print_card r3; print_card r4;
-  | CarteHaute (r1,r2,r3,r4,r5) -> print_card r1; print_card r2; print_card r3; print_card r4; print_card r5;
+  | QuinteFlush r -> print_rang r;
+  | Carre (r1,r2) -> print_rang r1; print_rang r2;
+  | Full  (r1,r2) ->  print_rang r1; print_rang r2;
+  | Couleur (r1,r2,r3,r4,r5) -> print_rang r1; print_rang r2; print_rang r3; print_rang r4; print_rang r5;
+  | Suite r -> print_rang r;
+  | Brelan (r1,r2,r3) ->  print_rang r1; print_rang r2; print_rang r3;
+  | DoublePaire (r1,r2,r3) ->  print_rang r1; print_rang r2; print_rang r3;
+  | Paire (r1,r2,r3,r4) -> print_rang r1; print_rang r2; print_rang r3; print_rang r4;
+  | CarteHaute (r1,r2,r3,r4,r5) -> print_rang r1; print_rang r2; print_rang r3; print_rang r4; print_rang r5;
   print_endline("FIN PRINT COMB");
 ;;
 
