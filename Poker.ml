@@ -19,11 +19,47 @@ type comb = QuinteFlush of rang
 (* Pas encore fini *)
 (* Compare deux combinaisons "du même type" *)
 let compare_comb_equals c1 c2 = match c1, c2 with
-  | (QuinteFlush r), (QuinteFlush r2) -> 
+  | (QuinteFlush r), (QuinteFlush r2) | (Suite r), (Suite r2) -> 
                   if r > r2 then 1
                   else if r < r2 then -1
                   else 0
-  | _ -> 2
+  | Carre (r1,r2), Carre (r3,r4) | Full (r1,r2), Full (r3,r4) -> 
+                  if r1 > r3 then 1
+                  else if r1 < r3 then -1
+                  else if r2 > r4 then 1
+                  else if r2 < r4 then -1
+                  else 0
+  | Brelan (r1,r2,r3), Brelan (r4,r5,r6) | DoublePaire (r1,r2,r3), DoublePaire (r4,r5,r6) -> 
+                  if r1 > r4 then 1
+                  else if r1 < r4 then -1
+                  else if r2 > r5 then 1
+                  else if r2 < r5 then -1
+                  else if r3 > r6 then 1
+                  else if r3 < r6 then -1
+                  else 0
+  | Paire (r1,r2,r3,r4), Paire (r5,r6,r7,r8) -> 
+                  if r1 > r5 then 1
+                  else if r1 < r5 then -1
+                  else if r2 > r6 then 1
+                  else if r2 < r6 then -1
+                  else if r3 > r7 then 1
+                  else if r3 < r7 then -1
+                  else if r4 > r8 then 1
+                  else if r4 < r8 then -1
+                  else 0
+  | Couleur (r1,r2,r3,r4,r5), Couleur (r6,r7,r8,r9,r10) | CarteHaute (r1,r2,r3,r4,r5), CarteHaute (r6,r7,r8,r9,r10) -> 
+                  if r1 > r6 then 1
+                  else if r1 < r6 then -1
+                  else if r2 > r7 then 1
+                  else if r2 < r7 then -1
+                  else if r3 > r8 then 1
+                  else if r3 < r8 then -1
+                  else if r4 > r9 then 1
+                  else if r4 < r9 then -1
+                  else if r5 > r10 then 1
+                  else if r5 < r10 then -1
+                  else 0
+  | _ , _  -> failwith("Pas possible")
 ;;
 
 (* let valeur_comb c = match c with
@@ -166,13 +202,14 @@ let compare_hands d1 d2 t =
         compare_comb (combMax l1) (combMax l2) 
 ;;
 
-let test1 = QuinteFlush(Valeur(10));;
-let test2 = QuinteFlush(Valeur(9));;
+let test1 = Suite(Valeur(7));;
+let test2 = Suite(Valeur(8));;
 let main1 = Main(Carte(Valeur(1),Pique),Carte(Valeur(1),Coeur));;
 let main2 = Main(Carte(Valeur(13),Pique),Carte(Valeur(9),Coeur));;
 let table = River(Carte(Valeur(9),Pique),Carte(Valeur(10),Carreau),Carte(Valeur(11),Trefle),Carte(Valeur(8),Coeur),Carte(Valeur(2),Pique));;
 
 let a = compute_comb main1 table;;
 
-compare_comb test1 test2;;  
 let b = compare_hands main1 main2 table;;
+
+let c = compare_comb test1 test2;;  
