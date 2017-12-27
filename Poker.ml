@@ -1,3 +1,4 @@
+
 type couleur = Pique | Coeur | Carreau | Trefle ;;
 type rang = Valeur of int;;
 type carte = Carte of rang * couleur ;;
@@ -50,6 +51,7 @@ let valeur_comb c = match c with
 ;;
 
 
+
 let print_rang (r:rang) = match r with
   Valeur i -> print_newline (); print_int(i); print_newline ();
 ;;
@@ -90,6 +92,7 @@ let list_card d t =
 ;;
 
 (*retourne la liste des rank*)
+(*par ordre decroissant*)
 let list_rank tab_rang =
   let rec aux i l =
     if i > 12 then l
@@ -104,6 +107,15 @@ let rec carreAdd list_rank i l = match list_rank with
   |h::_ -> Carre(Valeur(i),h)::l
   |[] -> failwith("Tableau Vide")
 ;;
+
+let rec pairAdd list_rank i l =
+  let list_rank_sans_i = (List.filter (fun x -> i != (match x with Valeur value -> value)) list_rank)
+  in match list_rank_sans_i with
+    |h1::h2::h3::t -> Paire(Valeur(i),h1,h2,h3)::l
+    |[] |_::[] |_::_::[] -> failwith("Mauvaise utilistation de la fonction pairAdd")
+;;
+
+
 
 let compute_comb d t =
   let l = Array.make 13 0
@@ -131,7 +143,7 @@ let compute_comb d t =
     else match l.(i) with
       | 0 -> list_comb (i-1) lc
       | 1 -> list_comb (i-1) (Suite(Valeur(i+5))::lc)
-      | 2 -> list_comb (i-1) (Suite(Valeur(i+5))::lc)
+      | 2 -> list_comb (i-1) (pairAdd liste_rang (i+1) lc)
       | 3 -> list_comb (i-1) (Suite(Valeur(i+5))::lc)
       | 4 -> list_comb (i-1) (carreAdd liste_rang (i+1) lc)
       | _ -> failwith("Pas possible")
