@@ -102,10 +102,18 @@ let list_rank tab_rang =
   in aux 0 []
 ;;
 
-let rec carreAdd list_rank i l = match list_rank with
-  |h::t when (match h with Valeur value -> value) = i -> carreAdd t i l
-  |h::_ -> Carre(Valeur(i),h)::l
-  |[] -> failwith("Tableau Vide")
+let rec carreAdd list_rank i l =
+  let list_rank_sans_i = (List.filter (fun x -> i != (match x with Valeur value -> value)) list_rank)
+  in match list_rank_sans_i with
+    |h::t -> Carre(Valeur(i),h)::l
+    |[] -> failwith("Mauvaise utilistation de la fonction carreAdd")
+;;
+
+let rec brelanAdd list_rank i l =
+  let list_rank_sans_i = (List.filter (fun x -> i != (match x with Valeur value -> value)) list_rank)
+  in match list_rank_sans_i with
+    |h1::h2::t -> Brelan(Valeur(i),h1,h2)::l
+    |[]|_::[] -> failwith("Mauvaise utilistation de la fonction carreAdd")
 ;;
 
 let rec pairAdd list_rank i l =
@@ -144,7 +152,7 @@ let compute_comb d t =
       | 0 -> list_comb (i-1) lc
       | 1 -> list_comb (i-1) (Suite(Valeur(i+5))::lc)
       | 2 -> list_comb (i-1) (pairAdd liste_rang (i+1) lc)
-      | 3 -> list_comb (i-1) (Suite(Valeur(i+5))::lc)
+      | 3 -> list_comb (i-1) (brelanAdd liste_rang (i+1) lc)
       | 4 -> list_comb (i-1) (carreAdd liste_rang (i+1) lc)
       | _ -> failwith("Pas possible")
   in list_comb 12 []
