@@ -211,6 +211,14 @@ let compare_hands d1 d2 t =
 
 let test1 = Suite(Valeur(7));;
 let test2 = Suite(Valeur(8));;
+let test3 = Suite(Valeur(9));;
+let test4 = Suite(Valeur(10));;
+let test5 = QuinteFlush(Valeur(6));;
+
+let lstComb = test1::test2::test3::test4::test5::[];;
+
+let max = combMax lstComb;;
+
 let main1 = Main(Carte(Valeur(1),Pique),Carte(Valeur(1),Coeur));;
 let main2 = Main(Carte(Valeur(13),Pique),Carte(Valeur(9),Coeur));;
 let table = River(Carte(Valeur(9),Pique),Carte(Valeur(10),Carreau),Carte(Valeur(11),Trefle),Carte(Valeur(8),Coeur),Carte(Valeur(2),Pique));;
