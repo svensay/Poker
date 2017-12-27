@@ -121,7 +121,7 @@ let compute_comb d t =
       | 1 -> list_comb (i-1) (Suite(Valeur(i+5))::lc)
       | 2 -> list_comb (i-1) (Suite(Valeur(i+5))::lc)
       | 3 -> list_comb (i-1) (Suite(Valeur(i+5))::lc)
-      | 4 -> list_comb (i-1) (carreAdd liste_rang i lc)
+      | 4 -> list_comb (i-1) (carreAdd liste_rang (i+1) lc)
       | _ -> failwith("Pas possible")
   in list_comb 12 []
 ;;
