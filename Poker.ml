@@ -16,10 +16,9 @@ type comb = QuinteFlush of rang
       | CarteHaute of rang*rang*rang*rang*rang(*Compare la meilleur rang et en cas d'égalité on regarde la prochaine plus forte et ainci de suite*);;
 ;;
 
-(* Pas encore fini *)
 (* Compare deux combinaisons "du même type" *)
 let compare_comb_equals c1 c2 = match c1, c2 with
-  | (QuinteFlush r), (QuinteFlush r2) | (Suite r), (Suite r2) -> 
+  | QuinteFlush r, QuinteFlush r2 | Suite r, Suite r2 -> 
                   if r > r2 then 1
                   else if r < r2 then -1
                   else 0
