@@ -25,7 +25,7 @@ let compare_comb_equals c1 c2 = match c1, c2 with
   | _ -> 2
 ;;
 
-let valeur_comb c = match c with
+(* let valeur_comb c = match c with
   | QuinteFlush r -> print_endline("QuinteFlush"); 9
   | Carre (r1,r2) -> print_endline("Carre"); 8
   | Full  (r1,r2) ->  print_endline("Full"); 7
@@ -35,29 +35,46 @@ let valeur_comb c = match c with
   | DoublePaire (r1,r2,r3) ->  print_endline("DoublePaire"); 3
   | Paire (r1,r2,r3,r4) -> print_endline("Paire"); 2
   | CarteHaute (r1,r2,r3,r4,r5) -> print_endline("CarteHaute"); 1
+;; *)
+
+let valeur_comb c = match c with
+  | QuinteFlush r -> 9
+  | Carre (r1,r2) -> 8
+  | Full  (r1,r2) ->  7
+  | Couleur (r1,r2,r3,r4,r5) -> 6
+  | Suite r -> 5
+  | Brelan (r1,r2,r3) ->  4
+  | DoublePaire (r1,r2,r3) ->  3
+  | Paire (r1,r2,r3,r4) -> 2
+  | CarteHaute (r1,r2,r3,r4,r5) -> 1
 ;;
 
+
 let print_rang (r:rang) = match r with
-  Valeur i -> print_int(i); print_newline ();
+  Valeur i -> print_newline (); print_int(i); print_newline ();
 ;;
 
 let print_comb c = 
   print_endline("DEBUT PRINT COMB");
   match c with
-  | QuinteFlush r -> print_rang r;
-  | Carre (r1,r2) -> print_rang r1; print_rang r2;
-  | Full  (r1,r2) ->  print_rang r1; print_rang r2;
-  | Couleur (r1,r2,r3,r4,r5) -> print_rang r1; print_rang r2; print_rang r3; print_rang r4; print_rang r5;
-  | Suite r -> print_rang r;
-  | Brelan (r1,r2,r3) ->  print_rang r1; print_rang r2; print_rang r3;
-  | DoublePaire (r1,r2,r3) ->  print_rang r1; print_rang r2; print_rang r3;
-  | Paire (r1,r2,r3,r4) -> print_rang r1; print_rang r2; print_rang r3; print_rang r4;
-  | CarteHaute (r1,r2,r3,r4,r5) -> print_rang r1; print_rang r2; print_rang r3; print_rang r4; print_rang r5;
+  | QuinteFlush r -> print_endline("QuinteFlush"); print_rang r;
+  | Carre (r1,r2) -> print_endline("Carre"); print_rang r1; print_rang r2;
+  | Full  (r1,r2) ->  print_endline("Full"); print_rang r1; print_rang r2;
+  | Couleur (r1,r2,r3,r4,r5) -> print_endline("Couleur"); print_rang r1; print_rang r2; print_rang r3; print_rang r4; print_rang r5;
+  | Suite r -> print_endline("Suite"); print_rang r;
+  | Brelan (r1,r2,r3) -> print_endline("Brelan");  print_rang r1; print_rang r2; print_rang r3;
+  | DoublePaire (r1,r2,r3) ->  print_endline("DoublePaire"); print_rang r1; print_rang r2; print_rang r3;
+  | Paire (r1,r2,r3,r4) -> print_endline("Paire"); print_rang r1; print_rang r2; print_rang r3; print_rang r4;
+  | CarteHaute (r1,r2,r3,r4,r5) -> print_endline("CarteHaute"); print_rang r1; print_rang r2; print_rang r3; print_rang r4; print_rang r5;
   print_endline("FIN PRINT COMB");
 ;;
 
 let compare_comb c1 c2 =
-        print_comb c1; print_comb c2;
+(*         print_endline("c1");
+        print_comb c1; 
+        print_endline("c2");
+        print_comb c2;
+ *)        
         if valeur_comb c1 > valeur_comb c2 then 1
         else if valeur_comb c2 > valeur_comb c1 then -1
         else compare_comb_equals c1 c2
@@ -66,10 +83,10 @@ let compare_comb c1 c2 =
 let list_card d t =
         let l = [] in
         match d with
-    | Main (c1,c2) -> match t with
-        | Flop (c3,c4,c5) -> (c1::(c2::(c3::(c4::(c5::l)))))
-        | Turn (c3,c4,c5,c6) -> (c1::(c2::(c3::(c4::(c5::(c6::l))))))
-        | River (c3,c4,c5,c6,c7) -> (c1::(c2::(c3::(c4::(c5::(c6::(c7::l)))))))
+        | Main (c1,c2) -> match t with
+          | Flop (c3,c4,c5) -> (c1::(c2::(c3::(c4::(c5::l)))))
+          | Turn (c3,c4,c5,c6) -> (c1::(c2::(c3::(c4::(c5::(c6::l))))))
+          | River (c3,c4,c5,c6,c7) -> (c1::(c2::(c3::(c4::(c5::(c6::(c7::l)))))))
 ;;
 
 (*retourne la liste des rank*)
@@ -133,13 +150,14 @@ let combMax l =
 let compare_hands d1 d2 t = 
         let l1 = compute_comb d1 t
         and l2 = compute_comb d2 t in
+        print_comb (combMax l1); print_comb (combMax l2);
         compare_comb (combMax l1) (combMax l2) 
 ;;
 
 let test1 = QuinteFlush(Valeur(10));;
 let test2 = QuinteFlush(Valeur(9));;
-let main1 = Main(Carte(Valeur(13),Pique),Carte(Valeur(7),Coeur));;
-let main2 = Main(Carte(Valeur(13),Pique),Carte(Valeur(7),Coeur));;
+let main1 = Main(Carte(Valeur(1),Pique),Carte(Valeur(1),Coeur));;
+let main2 = Main(Carte(Valeur(13),Pique),Carte(Valeur(9),Coeur));;
 let table = River(Carte(Valeur(9),Pique),Carte(Valeur(10),Carreau),Carte(Valeur(11),Trefle),Carte(Valeur(8),Coeur),Carte(Valeur(2),Pique));;
 
 let a = compute_comb main1 table;;
