@@ -137,10 +137,10 @@ let list_rank tab_rang =
     if i > 12 then l
     else match tab_rang.(i) with
       | 0 -> aux (i+1) l
-      | 1 -> aux (i+1) (Valeur(i+1)::l)
-      | 2 -> aux (i+1) (Valeur(i+1)::(Valeur(i+1)::l))
-      | 3 -> aux (i+1) (Valeur(i+1)::(Valeur(i+1)::(Valeur(i+1)::l)))
-      | 4 -> aux (i+1) (Valeur(i+1)::(Valeur(i+1)::(Valeur(i+1)::(Valeur(i+1)::l))))
+      | 1 -> aux (i+1) (Valeur(i+2)::l)
+      | 2 -> aux (i+1) (Valeur(i+2)::(Valeur(i+2)::l))
+      | 3 -> aux (i+1) (Valeur(i+2)::(Valeur(i+2)::(Valeur(i+2)::l)))
+      | 4 -> aux (i+1) (Valeur(i+2)::(Valeur(i+2)::(Valeur(i+2)::(Valeur(i+2)::l))))
 	
   in aux 0 []
 ;;
@@ -187,11 +187,13 @@ let creatColor list_i =
 (*list_color : tableau de boolean qui est true si a l'indide i, la carte de valeur i+1 est de la couleur de list_color(Voir compute_comp) *)
 (*list_i : accumule les i true*)
 let rec colorOrQuinteFlushAdd list_color color suite list_i i l =
-  if i < 0 then l
+  if i < 0 then match list_color.(12) with
+    |true when (suite+1) = 5 -> QuinteFlush(Valeur(i+7))::l
+    |_ -> l  
   else match list_color.(i) with
-    |true when suite+1 = 5 -> QuinteFlush(Valeur(i+5))::l
-    |true when color+1 = 5 -> (creatColor ((i+1)::list_i))::l
-    |true -> colorOrQuinteFlushAdd list_color (color+1) (suite+1) ((i+1)::list_i) (i-1) l
+    |true when suite+1 = 5 -> colorOrQuinteFlushAdd list_color (color+1) 0 ((i+2)::list_i) (i-1) (QuinteFlush(Valeur(i+6))::l)
+    |true when color+1 = 5 -> colorOrQuinteFlushAdd list_color 0 (suite+1) ((i+2)::list_i) (i-1) ((creatColor ((i+2)::list_i))::l)
+    |true -> colorOrQuinteFlushAdd list_color (color+1) (suite+1) ((i+2)::list_i) (i-1) l
     |false -> colorOrQuinteFlushAdd list_color color 0 list_i (i-1) l
 ;;
 
@@ -244,45 +246,58 @@ let rec doubleAndFull list_comb list_comb_tmp list_rank = match list_comb_tmp wi
       |_ -> doubleAndFull list_comb t list_rank
 ;;
 
-let compute_comb d t =
+(*Initialise l,coeur,pique,trefle et carreau avec card*)
+let rec count card l coeur pique trefle carreau =
+  match card with
+    | [] -> ()
+    | h::tl -> match h with
+	| Carte ((rank:rang),color) -> match rank with
+	    | Valeur v -> l.(v-2) <- l.(v-2)+1;
+	      match color with
+		| Pique -> pique.(v-2) <- true;count tl l coeur pique trefle carreau
+		| Coeur -> coeur.(v-2) <- true;count tl l coeur pique trefle carreau
+		| Carreau -> carreau.(v-2) <- true;count tl l coeur pique trefle carreau
+		| Trefle -> trefle.(v-2) <- true;count tl l coeur pique trefle carreau
+;;
+
+(*Ajoute Paire, Brelan, Carre et Suite a lc*)
+let rec list_comb i lc suite l liste_rang =(*Ajoute les Paire, Brelan et Carre*)
+  if i < 0 then match l.(12) with
+    | 1| 2| 3| 4 when (suite+1) = 5 -> Suite(Valeur(i+7))::lc
+    |_ -> lc
+  else match l.(i) with
+    | 0 -> list_comb (i-1) lc 0 l liste_rang
+    | 1 when (suite+1) = 5 -> list_comb (i-1) (Suite(Valeur(i+6))::lc) 0 l liste_rang
+    | 1 -> list_comb (i-1) lc (suite+1) l liste_rang
+    | 2 when (suite+1) = 5 -> list_comb (i-1) (Suite(Valeur(i+6))::(pairAdd liste_rang (i+2) lc)) 0 l liste_rang
+    | 2 -> list_comb (i-1) (pairAdd liste_rang (i+2) lc) (suite+1) l liste_rang
+    | 3 when (suite+1) = 5 -> list_comb (i-1) (Suite(Valeur(i+6))::(brelanAdd liste_rang (i+2) lc)) 0 l liste_rang
+    | 3 -> list_comb (i-1) (brelanAdd liste_rang (i+2) lc) (suite+1) l liste_rang
+    | 4 when (suite+1) = 5 -> list_comb (i-1) (Suite(Valeur(i+6))::(carreAdd liste_rang (i+2) lc)) 0 l liste_rang
+    | 4 -> list_comb (i-1) (carreAdd liste_rang (i+2) lc) (suite+1) l liste_rang
+    | _ -> failwith("Mauvaise utilistation de la fonction list_comb")
+;;
+
+(*Ajoute CarteHaute a lc*)
+let carteHauteAdd liste_rang lc = match liste_rang with
+  | h1::h2::h3::h4::h5::_ -> CarteHaute(h1,h2,h3,h4,h5)::lc
+  | []| _::[]| _::_::[]| _::_::_::[]| _::_::_::_::[] -> failwith("Mauvaise utilisation de la mehtode compute_comb")
+;;
+
+
+let compute_comb d t = 
   let l = Array.make 13 0
   and coeur = Array.make 13 false
   and pique = Array.make 13 false
   and trefle = Array.make 13 false
   and carreau = Array.make 13 false
-  and card = list_card d t in
-  let rec count c =
-    match c with
-      | [] -> ()
-      | h::tl -> match h with
-	  | Carte ((rank:rang),color) -> match rank with
-	      | Valeur v -> l.(v-1) <- l.(v-1)+1;
-		match color with
-		  | Pique -> pique.(v-1) <- true;count tl 
-		  | Coeur -> coeur.(v-1) <- true;count tl
-		  | Carreau -> carreau.(v-1) <- true;count tl
-		  | Trefle -> trefle.(v-1) <- true;count tl
-  in count card;
+  and card = list_card d t
+  in count card l coeur pique trefle carreau;
   let lc = colorOrQuinteFlushAdd trefle 0 0 [] 12 (colorOrQuinteFlushAdd carreau 0 0 [] 12 (colorOrQuinteFlushAdd coeur 0 0 [] 12 (colorOrQuinteFlushAdd pique 0 0 [] 12 [])))(*Ajoute Couleur ou QuinteFlush*)
   in let liste_rang = list_rank l
-  in let rec list_comb i lc suite =(*Ajoute les Paire, Brelan et Carre*)
-    if i < 0 then lc
-    else match l.(i) with
-      | 0 -> list_comb (i-1) lc 0
-      | 1 when (suite+1) = 5 -> list_comb (i-1) (Suite(Valeur(i+5))::lc) 0 
-      | 1 -> list_comb (i-1) lc (suite+1)
-      | 2 when (suite+1) = 5 -> list_comb (i-1) (Suite(Valeur(i+5))::(pairAdd liste_rang (i+1) lc)) 0
-      | 2 -> list_comb (i-1) (pairAdd liste_rang (i+1) lc) (suite+1)
-      | 3 when (suite+1) = 5 -> list_comb (i-1) (Suite(Valeur(i+5))::(brelanAdd liste_rang (i+1) lc)) 0
-      | 3 -> list_comb (i-1) (brelanAdd liste_rang (i+1) lc) (suite+1)
-      | 4 when (suite+1) = 5 -> list_comb (i-1) (Suite(Valeur(i+5))::(carreAdd liste_rang (i+1) lc)) 0
-      | 4 -> list_comb (i-1) (carreAdd liste_rang (i+1) lc) (suite+1)
-      | _ -> failwith("Pas possible")
-  in let final_list = list_comb 12 (match liste_rang with
-      h1::h2::h3::h4::h5::_ -> CarteHaute(h1,h2,h3,h4,h5)::lc
-    |[]|_::[]|_::_::[]|_::_::_::[]|_::_::_::_::[] -> failwith("Mauvaise utilisation de la mehtode compute_comb")) 0 (*Ajoute CarteHaute*)
-     in doubleAndFull final_list final_list liste_rang (*Ajoute DoublePaire ou Full*)
-     
+     in let final_list = list_comb 12 (carteHauteAdd liste_rang lc) 0 l liste_rang(*Ajoute CarteHaute*)
+	in doubleAndFull final_list final_list liste_rang (*Ajoute DoublePaire ou Full*)
+	
 ;;
 
 (* retourne la combinaison maximale de la liste (on suppose qu'il y a au moins 1 élément dans la liste) *)
@@ -311,9 +326,9 @@ let lstComb = test1::test2::test3::test4::test5::[];;
 
 let max = combMax lstComb;;
 
-let main1 = Main(Carte(Valeur(7),Pique),Carte(Valeur(2),Coeur));;
+let main1 = Main(Carte(Valeur(3),Pique),Carte(Valeur(2),Coeur));;
 let main2 = Main(Carte(Valeur(13),Pique),Carte(Valeur(9),Coeur));;
-let table = River(Carte(Valeur(9),Pique),Carte(Valeur(10),Pique),Carte(Valeur(7),Trefle),Carte(Valeur(7),Coeur),Carte(Valeur(2),Pique));;
+let table = River(Carte(Valeur(9),Coeur),Carte(Valeur(14),Pique),Carte(Valeur(5),Pique),Carte(Valeur(4),Pique),Carte(Valeur(2),Pique));;
 
 let a = compute_comb main1 table;;
 
