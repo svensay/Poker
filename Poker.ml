@@ -1,4 +1,3 @@
-
 type couleur = Pique | Coeur | Carreau | Trefle ;;
 type rang = Valeur of int;;
 type carte = Carte of rang * couleur ;;
@@ -6,12 +5,11 @@ type donne = Main of carte*carte;;
 type table = Flop of carte*carte*carte | Turn of carte*carte*carte*carte | River of carte*carte*carte*carte*carte;;
 type comb = QuinteFlush of rang
       | Carre of rang*rang(*suite de 4*)
-      | Full of rang*rang(*suite de 3*)
+      | Full of rang*rang(*1er rang la valeur du brelan et 2eme celle de la pair*)
       | Couleur of rang*rang*rang*rang*rang (*en cas d'égalité faut verifier la carte suivante*)
       | Suite of rang
-      | Brelan of rang*rang*rang
+      | Brelan of rang*rang*rang(*suite de 3*)
       | DoublePaire of rang*rang*rang (*1er rang -> 1er paire, 2éme rang -> 2éme paire, 3éme -> derniére carte*)
-
       | Paire of rang*rang*rang*rang(*1er rang -> 1er paire, le reste des rangs sont les cartes qu'on compare en cas d'égalité*)
       | CarteHaute of rang*rang*rang*rang*rang(*Compare la meilleur rang et en cas d'égalité on regarde la prochaine plus forte et ainci de suite*);;
 ;;
@@ -117,6 +115,12 @@ let compare_comb c1 c2 =
         else compare_comb_equals c1 c2
 ;;
 
+(*Donne la valeur du rang rank*)
+let rankToValue rank =
+  match rank with Valeur value -> value
+;;
+
+(*Renvoie la liste de carte de la donne d et de la table t*)
 let list_card d t =
         let l = [] in
         match d with
@@ -133,32 +137,112 @@ let list_rank tab_rang =
     if i > 12 then l
     else match tab_rang.(i) with
       | 0 -> aux (i+1) l
-      | _ -> aux (i+1) (Valeur(i+1)::l)
+      | 1 -> aux (i+1) (Valeur(i+1)::l)
+      | 2 -> aux (i+1) (Valeur(i+1)::(Valeur(i+1)::l))
+      | 3 -> aux (i+1) (Valeur(i+1)::(Valeur(i+1)::(Valeur(i+1)::l)))
+      | 4 -> aux (i+1) (Valeur(i+1)::(Valeur(i+1)::(Valeur(i+1)::(Valeur(i+1)::l))))
+	
   in aux 0 []
 ;;
 
+(*Ajoute la combinaison Carre dans l*)
+(*i valeur du Carre(Ex:i=4, Carre de 4)*)
+(*list_rank : liste des rangs de la table et de la donne(voir compute_comp*)
 let rec carreAdd list_rank i l =
-  let list_rank_sans_i = (List.filter (fun x -> i != (match x with Valeur value -> value)) list_rank)
+  let list_rank_sans_i = (List.filter (fun x -> i != rankToValue x) list_rank)
   in match list_rank_sans_i with
     |h::t -> Carre(Valeur(i),h)::l
     |[] -> failwith("Mauvaise utilistation de la fonction carreAdd")
 ;;
 
+(*Ajoute la combinaison Brelan dans l*)
+(*i valeur du Brelan(Ex:i=10, Brelan de 10)*)
+(*list_rank : liste des rangs de la table et de la donne(voir compute_comp*)
 let rec brelanAdd list_rank i l =
-  let list_rank_sans_i = (List.filter (fun x -> i != (match x with Valeur value -> value)) list_rank)
+  let list_rank_sans_i = (List.filter (fun x -> i != rankToValue x) list_rank)
   in match list_rank_sans_i with
     |h1::h2::t -> Brelan(Valeur(i),h1,h2)::l
-    |[]|_::[] -> failwith("Mauvaise utilistation de la fonction carreAdd")
+    |[]|_::[] -> failwith("Mauvaise utilistation de la fonction brelanAdd")
 ;;
 
+(*Ajoute la combinaison Paire dans l*)
+(*i valeur de la Pair(Ex:i=5, Paire de 5)*)
+(*list_rank : liste des rangs de la table et de la donne(voir compute_comp*)
 let rec pairAdd list_rank i l =
-  let list_rank_sans_i = (List.filter (fun x -> i != (match x with Valeur value -> value)) list_rank)
+  let list_rank_sans_i = (List.filter (fun x -> i != rankToValue x) list_rank)
   in match list_rank_sans_i with
-    |h1::h2::h3::t -> Paire(Valeur(i),h1,h2,h3)::l
+    |h1::h2::h3::_ -> Paire(Valeur(i),h1,h2,h3)::l
     |[] |_::[] |_::_::[] -> failwith("Mauvaise utilistation de la fonction pairAdd")
 ;;
 
+(*Créer une combinaison Couleur avec les valeurs de list_i(Voir colorAdd)*)
+let creatColor list_i =
+  match list_i with
+    |h1::h2::h3::h4::h5::_ -> Couleur(Valeur(h5),Valeur(h4),Valeur(h3),Valeur(h2),Valeur(h1))
+    |[]|_::[]|_::_::[]|_::_::_::[]|_::_::_::_::[] -> failwith("Mauvaise utilisation de la mehtode creatColor")
+;;
 
+(*Renvoie si suite de couleur(variable : suite) : QuinteFlush à l*)
+(*Si 5 couleur non succecive (variable : color) : Couleur à l*)
+(*list_color : tableau de boolean qui est true si a l'indide i, la carte de valeur i+1 est de la couleur de list_color(Voir compute_comp) *)
+(*list_i : accumule les i true*)
+let rec colorOrQuinteFlushAdd list_color color suite list_i i l =
+  if i < 0 then l
+  else match list_color.(i) with
+    |true when suite+1 = 5 -> QuinteFlush(Valeur(i+5))::l
+    |true when color+1 = 5 -> (creatColor ((i+1)::list_i))::l
+    |true -> colorOrQuinteFlushAdd list_color (color+1) (suite+1) ((i+1)::list_i) (i-1) l
+    |false -> colorOrQuinteFlushAdd list_color color 0 list_i (i-1) l
+;;
+
+
+(*Ajoute une DoublePaire a l avec le plus grand rang entre rang1 et rang2 en 1er et le plus grand rank dans list_rank hors rang1 et rang2(Voir findPaire)*)
+let rec doublePairAdd list_rank rang1 rang2 l =
+  let list_rank_sans = (List.filter (fun x -> (rankToValue rang1)  != (rankToValue x) && (rankToValue rang2) != (rankToValue x)) list_rank)
+  in match list_rank_sans with
+    |h::_ when (rankToValue rang1) >  (rankToValue rang2)  -> DoublePaire(rang1,rang2,h)::l
+    |h::_ when (rankToValue rang1) <  (rankToValue rang2)  -> DoublePaire(rang2,rang1,h)::l
+    |[]|_::_-> failwith("Mauvaise utilistation de la fonction doublePairAdd")
+;;
+
+(*si combinaison = Paire alors ajoute DoublePaire a list_comb*)
+(*si combinaison = Brelan alors ajoute Full a list_comb*)
+(*Méthode auxiliaire utiliser dans auxDoubleAndFull*)
+let findPaire combinaison list_rank list_comb r1 = match combinaison with
+  | Paire (k1,k2,k3,k4) -> doublePairAdd list_rank r1 k1 list_comb
+  | Brelan (k1,k2,k3) -> Full(k1,r1)::list_comb
+  | _ -> failwith("Mauvaise utilistation de la fonction auxDoubleAndFull")
+;;
+
+(*si combinaison = Paire alors ajoute Full a list_comb*)
+(*Méthode auxiliaire utiliser dans auxDoubleAndFull*)
+let findBrelan combinaison list_comb r1 =  match combinaison with
+  | Paire (k1,k2,k3,k4) -> Full(r1,k1)::list_comb
+  |_ -> failwith("Mauvaise utilistation de la fonction auxDoubleAndFull")
+;;
+
+(*Si on trouve un Brelan ou une Paire dans list_comb_tmp, ajoute une DoublePaire ou un Full dans list_comb*)
+(*sinon renvoie list_comb*)
+(*Méthode auxiliaire utiliser dans doubleAndFull*)
+let rec auxDoubleAndFull combinaison list_comb list_comb_tmp list_rank = match list_comb_tmp with
+  |[] -> list_comb
+  |h::t -> match h with
+      |Paire (r1,r2,r3,r4) -> findPaire combinaison list_rank list_comb r1
+      |Brelan (r1,r2,r3) -> findBrelan combinaison list_comb r1
+      |_ -> auxDoubleAndFull combinaison list_comb t list_rank
+;;
+
+
+(*Si on trouve un Brelan ou une Paire dans list_comb_tmp, on utilise auxDoubleAndFull pour chercher soit un autre Brelan soit une autre Paire pour savoir si il y a un Full ou une Double.*)
+(*S'il y'a alors ajoute a list_comb*)
+(*Sinon retourne list_comb*)
+let rec doubleAndFull list_comb list_comb_tmp list_rank = match list_comb_tmp with
+  |[] -> list_comb
+  |h::t -> match h with
+      |Paire (r1,r2,r3,r4) -> auxDoubleAndFull h list_comb t list_rank
+      |Brelan (r1,r2,r3) ->  auxDoubleAndFull h list_comb t list_rank
+      |_ -> doubleAndFull list_comb t list_rank
+;;
 
 let compute_comb d t =
   let l = Array.make 13 0
@@ -179,34 +263,42 @@ let compute_comb d t =
 		  | Carreau -> carreau.(v-1) <- true;count tl
 		  | Trefle -> trefle.(v-1) <- true;count tl
   in count card;
-  
-  let liste_rang = list_rank l in
-  let rec list_comb i lc =
+  let lc = colorOrQuinteFlushAdd trefle 0 0 [] 12 (colorOrQuinteFlushAdd carreau 0 0 [] 12 (colorOrQuinteFlushAdd coeur 0 0 [] 12 (colorOrQuinteFlushAdd pique 0 0 [] 12 [])))(*Ajoute Couleur ou QuinteFlush*)
+  in let liste_rang = list_rank l
+  in let rec list_comb i lc suite =(*Ajoute les Paire, Brelan et Carre*)
     if i < 0 then lc
     else match l.(i) with
-      | 0 -> list_comb (i-1) lc
-      | 1 -> list_comb (i-1) (Suite(Valeur(i+5))::lc)
-      | 2 -> list_comb (i-1) (pairAdd liste_rang (i+1) lc)
-      | 3 -> list_comb (i-1) (brelanAdd liste_rang (i+1) lc)
-      | 4 -> list_comb (i-1) (carreAdd liste_rang (i+1) lc)
+      | 0 -> list_comb (i-1) lc 0
+      | 1 when (suite+1) = 5 -> list_comb (i-1) (Suite(Valeur(i+5))::lc) 0 
+      | 1 -> list_comb (i-1) lc (suite+1)
+      | 2 when (suite+1) = 5 -> list_comb (i-1) (Suite(Valeur(i+5))::(pairAdd liste_rang (i+1) lc)) 0
+      | 2 -> list_comb (i-1) (pairAdd liste_rang (i+1) lc) (suite+1)
+      | 3 when (suite+1) = 5 -> list_comb (i-1) (Suite(Valeur(i+5))::(brelanAdd liste_rang (i+1) lc)) 0
+      | 3 -> list_comb (i-1) (brelanAdd liste_rang (i+1) lc) (suite+1)
+      | 4 when (suite+1) = 5 -> list_comb (i-1) (Suite(Valeur(i+5))::(carreAdd liste_rang (i+1) lc)) 0
+      | 4 -> list_comb (i-1) (carreAdd liste_rang (i+1) lc) (suite+1)
       | _ -> failwith("Pas possible")
-  in list_comb 12 []
+  in let final_list = list_comb 12 (match liste_rang with
+      h1::h2::h3::h4::h5::_ -> CarteHaute(h1,h2,h3,h4,h5)::lc
+    |[]|_::[]|_::_::[]|_::_::_::[]|_::_::_::_::[] -> failwith("Mauvaise utilisation de la mehtode compute_comb")) 0 (*Ajoute CarteHaute*)
+     in doubleAndFull final_list final_list liste_rang (*Ajoute DoublePaire ou Full*)
+     
 ;;
 
 (* retourne la combinaison maximale de la liste (on suppose qu'il y a au moins 1 élément dans la liste) *)
 let combMax l =
-        let rec aux c l = match l with
-          | [] -> c
-          | h::t -> if (compare_comb h c) == 1 then aux h t
-                    else aux c t  
-        in aux (List.hd l) l
+  let rec aux c l = match l with
+    | [] -> c
+    | h::t -> if (compare_comb h c) == 1 then aux h t
+      else aux c t  
+  in aux (List.hd l) l
 ;;
 
 let compare_hands d1 d2 t = 
-        let l1 = compute_comb d1 t
-        and l2 = compute_comb d2 t in
-        print_comb (combMax l1); print_comb (combMax l2);
-        compare_comb (combMax l1) (combMax l2) 
+  let l1 = compute_comb d1 t
+  and l2 = compute_comb d2 t in
+  print_comb (combMax l1); print_comb (combMax l2);
+  compare_comb (combMax l1) (combMax l2) 
 ;;
 
 let test1 = Suite(Valeur(7));;
@@ -219,9 +311,9 @@ let lstComb = test1::test2::test3::test4::test5::[];;
 
 let max = combMax lstComb;;
 
-let main1 = Main(Carte(Valeur(1),Pique),Carte(Valeur(1),Coeur));;
+let main1 = Main(Carte(Valeur(7),Pique),Carte(Valeur(2),Coeur));;
 let main2 = Main(Carte(Valeur(13),Pique),Carte(Valeur(9),Coeur));;
-let table = River(Carte(Valeur(9),Pique),Carte(Valeur(10),Carreau),Carte(Valeur(11),Trefle),Carte(Valeur(8),Coeur),Carte(Valeur(2),Pique));;
+let table = River(Carte(Valeur(9),Pique),Carte(Valeur(10),Pique),Carte(Valeur(7),Trefle),Carte(Valeur(7),Coeur),Carte(Valeur(2),Pique));;
 
 let a = compute_comb main1 table;;
 
