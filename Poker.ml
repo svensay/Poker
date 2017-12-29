@@ -9,7 +9,8 @@ type comb = QuinteFlush of rang
       | Couleur of rang*rang*rang*rang*rang (*en cas d'égalité faut verifier la carte suivante*)
       | Suite of rang
       | Brelan of rang*rang*rang(*suite de 3*)
-      | DoublePaire of rang*rang*rang (*1er rang -> 1er paire, 2éme rang -> 2éme paire, 3éme -> derniére carte*)
+      | DoublePaire of rang*rang*rang (*1er rang -> 1er 
+paire, 2éme rang -> 2éme paire, 3éme -> derniére carte*)
       | Paire of rang*rang*rang*rang(*1er rang -> 1er paire, le reste des rangs sont les cartes qu'on compare en cas d'égalité*)
       | CarteHaute of rang*rang*rang*rang*rang(*Compare la meilleur rang et en cas d'égalité on regarde la prochaine plus forte et ainci de suite*);;
 ;;
@@ -188,7 +189,7 @@ let creatColor list_i =
 (*list_i : accumule les i true*)
 let rec colorOrQuinteFlushAdd list_color color suite list_i i l =
   if i < 0 then match list_color.(12) with
-    |true when (suite+1) = 5 -> QuinteFlush(Valeur(i+7))::l
+    |true when (suite+1) = 5 -> QuinteFlush(Valeur(i+6))::l
     |_ -> l  
   else match list_color.(i) with
     |true when suite+1 = 5 -> colorOrQuinteFlushAdd list_color (color+1) 0 ((i+2)::list_i) (i-1) (QuinteFlush(Valeur(i+6))::l)
@@ -229,8 +230,8 @@ let findBrelan combinaison list_comb r1 =  match combinaison with
 let rec auxDoubleAndFull combinaison list_comb list_comb_tmp list_rank = match list_comb_tmp with
   |[] -> list_comb
   |h::t -> match h with
-      |Paire (r1,r2,r3,r4) -> findPaire combinaison list_rank list_comb r1
-      |Brelan (r1,r2,r3) -> findBrelan combinaison list_comb r1
+      |Paire (r1,r2,r3,r4) -> auxDoubleAndFull combinaison (findPaire combinaison list_rank list_comb r1) t list_rank
+      |Brelan (r1,r2,r3) -> auxDoubleAndFull combinaison (findBrelan combinaison list_comb r1) t list_rank
       |_ -> auxDoubleAndFull combinaison list_comb t list_rank
 ;;
 
