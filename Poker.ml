@@ -264,7 +264,7 @@ let rec count card l coeur pique trefle carreau =
 (*Ajoute Paire, Brelan, Carre et Suite a lc*)
 let rec list_comb i lc suite l liste_rang =(*Ajoute les Paire, Brelan et Carre*)
   if i < 0 then match l.(12) with
-    | 1| 2| 3| 4 when (suite+1) = 5 -> Suite(Valeur(i+7))::lc
+    | 1| 2| 3| 4 when (suite+1) = 5 -> Suite(Valeur(i+6))::lc
     |_ -> lc
   else match l.(i) with
     | 0 -> list_comb (i-1) lc 0 l liste_rang
