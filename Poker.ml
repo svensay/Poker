@@ -316,6 +316,9 @@ let compare_hands d1 d2 t =
   compare_comb (combMax l1) (combMax l2) 
 ;;
 
+
+(* let compute_comb_max d t *)
+
 let test1 = Suite(Valeur(7));;
 let test2 = Suite(Valeur(8));;
 let test3 = Suite(Valeur(9));;
@@ -327,10 +330,13 @@ let lstComb = test1::test2::test3::test4::test5::[];;
 let max = combMax lstComb;;
 
 let main1 = Main(Carte(Valeur(3),Pique),Carte(Valeur(2),Coeur));;
-let main2 = Main(Carte(Valeur(13),Pique),Carte(Valeur(9),Coeur));;
+let main2 = Main(Carte(Valeur(13),Pique),Carte(Valeur(8),Coeur));;
 let table = River(Carte(Valeur(9),Coeur),Carte(Valeur(14),Pique),Carte(Valeur(5),Pique),Carte(Valeur(4),Pique),Carte(Valeur(2),Pique));;
 
-let a = compute_comb main1 table;;
+let compute1 = compute_comb main1 table;;
+let compute2 = compute_comb main2 table;;
+let max1 = combMax compute1;;
+let max2 = combMax compute2;;
 
 let b = compare_hands main1 main2 table;;
 
