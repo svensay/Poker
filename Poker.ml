@@ -263,18 +263,15 @@ let rec count card l coeur pique trefle carreau =
 
 (*Ajoute Paire, Brelan, Carre et Suite a lc*)
 let rec list_comb i lc suite l liste_rang =(*Ajoute les Paire, Brelan et Carre*)
-  if i < 0 then match l.(12) with
+  if i < 0 then match l.(12) with (*Condition pour la suite As 2 3 4 5*)
     | 1| 2| 3| 4 when (suite+1) = 5 -> Suite(Valeur(i+6))::lc
     |_ -> lc
   else match l.(i) with
     | 0 -> list_comb (i-1) lc 0 l liste_rang
-    | 1 when (suite+1) = 5 -> list_comb (i-1) (Suite(Valeur(i+6))::lc) 0 l liste_rang
+    | 1 | 2 | 3 when (suite+1) = 5 -> list_comb (i-1) (Suite(Valeur(i+6))::lc) 0 l liste_rang
     | 1 -> list_comb (i-1) lc (suite+1) l liste_rang
-    | 2 when (suite+1) = 5 -> list_comb (i-1) (Suite(Valeur(i+6))::(pairAdd liste_rang (i+2) lc)) 0 l liste_rang
     | 2 -> list_comb (i-1) (pairAdd liste_rang (i+2) lc) (suite+1) l liste_rang
-    | 3 when (suite+1) = 5 -> list_comb (i-1) (Suite(Valeur(i+6))::(brelanAdd liste_rang (i+2) lc)) 0 l liste_rang
     | 3 -> list_comb (i-1) (brelanAdd liste_rang (i+2) lc) (suite+1) l liste_rang
-    | 4 when (suite+1) = 5 -> list_comb (i-1) (Suite(Valeur(i+6))::(carreAdd liste_rang (i+2) lc)) 0 l liste_rang
     | 4 -> list_comb (i-1) (carreAdd liste_rang (i+2) lc) (suite+1) l liste_rang
     | _ -> failwith("Mauvaise utilistation de la fonction list_comb")
 ;;
