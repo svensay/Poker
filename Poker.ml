@@ -317,7 +317,23 @@ let compare_hands d1 d2 t =
 ;;
 
 
-(* let compute_comb_max d t *)
+
+(* (*Initialise l,coeur,pique,trefle et carreau avec card*)
+let count2 card l coeur pique trefle carreau = match card with
+  | [] -> ()
+  | h::tl -> match h with
+    | Carte ((rank:rang),color) -> match rank with
+      | Valeur v -> l.(v-2) <- l.(v-2)+1;
+          match color with
+    | Pique -> pique.(v-2) <- true;count tl l coeur pique trefle carreau
+    | Coeur -> coeur.(v-2) <- true;count tl l coeur pique trefle carreau
+    | Carreau -> carreau.(v-2) <- true;count tl l coeur pique trefle carreau
+    | Trefle -> trefle.(v-2) <- true;count tl l coeur pique trefle carreau
+;;
+
+
+
+let compute_comb_max d t *)
 
 let test1 = Suite(Valeur(7));;
 let test2 = Suite(Valeur(8));;
