@@ -349,40 +349,52 @@ let same_card card1 card2 = match card1,card2 with
 let rec make_list_value i liste_de_rang  = if i < 0 then liste_de_rang else make_list_value (i-1) (Valeur(i+2)::liste_de_rang);;
    
 
+(*Ajoute a liste_des_cartes tous les cartes de couleur color*)
+(*valeur : Voir make_list_value*)
 let rec make_card_with_one_color color valeur liste_des_cartes = match valeur with
   |[] -> liste_des_cartes
   |h::t -> make_card_with_one_color color t (Carte(h,color)::liste_des_cartes)
 ;;
-  
+
+(*Initialise un paquet de carte (liste_des_cartes) avec le tableau de couleur avec le tableau de valeur*)
 let rec init_paquet_carte valeur couleur liste_des_cartes = match couleur with
   |[] -> liste_des_cartes
   |h::t -> init_paquet_carte valeur t (make_card_with_one_color h valeur liste_des_cartes)
 ;;
   
-  
+(*Creer un paquet de carte dans liste_des_cartes*)
 let cree_paquet_carte liste_des_cartes =
   let couleur = [Pique;Coeur;Carreau;Trefle]
   and valeur = make_list_value 12 []
   in init_paquet_carte valeur couleur liste_des_cartes
 ;;
 
-let rec add_donne card list_card l = match list_card with
-  | [] -> l
-  | h::t -> add_donne card t (Main(card,h)::l)
+(*Ajoute un donne dans liste_donne_d2 avec comme 1er carte "card" et 2eme carte le reste des cartes dans list_card*)
+let rec add_donne card list_card liste_donne_d2 = match list_card with
+  | [] -> liste_donne_d2
+  | h::t -> add_donne card t (Main(card,h)::liste_donne_d2)
 ;;
-  
+
+let proba_double d1 d2 t = (0.58,0.614)
+;;
     
 let proba_simple d1 t =
-  let liste_carte_pour_d2 = match d1,t with
+  let liste_carte_pour_d2 = match d1,t with(*Supprime les cartes de d1 et t dans liste_carte_pour_d2*)
   |Main(c1,c2),Flop(c3,c4,c5) -> List.filter (fun carte_tab -> not((same_card c1 carte_tab) || (same_card c2 carte_tab) || (same_card c3 carte_tab) || (same_card c4 carte_tab) || (same_card c5 carte_tab))) (cree_paquet_carte [])
   |Main(c1,c2),Turn(c3,c4,c5,c6) -> List.filter (fun carte_tab -> not((same_card c1 carte_tab) || (same_card c2 carte_tab) || (same_card c3 carte_tab) || (same_card c4 carte_tab) || (same_card c5 carte_tab) || (same_card c6 carte_tab))) (cree_paquet_carte [])
   |Main(c1,c2),River(c3,c4,c5,c6,c7) ->List.filter (fun carte_tab -> not((same_card c1 carte_tab) || (same_card c2 carte_tab) || (same_card c3 carte_tab) || (same_card c4 carte_tab) || (same_card c5 carte_tab) || (same_card c6 carte_tab)  || (same_card c7 carte_tab))) (cree_paquet_carte [])
-  in let rec toute_donne_d2 liste_carte_pour_d2 l = match liste_carte_pour_d2 with
-       |[] -> l
-       |h::t -> toute_donne_d2 t (add_donne h t l)
+  in let rec toute_donne_d2 liste_carte_pour_d2 liste_donne_d2 = match liste_carte_pour_d2 with(*Creer une liste de toutes les donnes possible pour d2*)
+       |[] -> liste_donne_d2
+       |h::t -> toute_donne_d2 t (add_donne h t liste_donne_d2)
      in let donne_d2 = toute_donne_d2 liste_carte_pour_d2 []
-        in ()
-        
+        in let rec tableau_proba donne_d2 tab_prob_d1_win = match donne_d2 with (*Creer la liste des probabilités de victoire de d1 avec toute les donne possibles de d2*)
+	  |[] -> tab_prob_d1_win
+	  |h::t -> tableau_proba t (fst(proba_double d1 h t)::tab_prob_d1_win)
+	   in let tab_prob_d1_win = tableau_proba donne_d2 []
+	      in let rec proba_win_d1 tab_prob_d1_win accumulateur = match tab_prob_d1_win with
+		|[] -> accumulateur
+		|h::t -> proba_win_d1 t (accumulateur*.h)
+		 in proba_win_d1 tab_prob_d1_win 1.0		 
 ;;
    
 let test1 = Suite(Valeur(7));;
