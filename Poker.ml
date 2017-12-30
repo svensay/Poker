@@ -365,13 +365,24 @@ let cree_paquet_carte liste_des_cartes =
   and valeur = make_list_value 12 []
   in init_paquet_carte valeur couleur liste_des_cartes
 ;;
+
+let rec add_donne card list_card l = match list_card with
+  | [] -> l
+  | h::t -> add_donne card t (Main(card,h)::l)
+;;
+  
     
 let proba_simple d1 t =
   let liste_carte_pour_d2 = match d1,t with
-  |Main(c1,c2),Flop(c3,c4,c5) -> List.filter (fun carte_tab -> (same_card c1 carte_tab) || (same_card c2 carte_tab) || (same_card c3 carte_tab) || (same_card c4 carte_tab) || (same_card c5 carte_tab)) (cree_paquet_carte [])
-  |Main(c1,c2),Turn(c3,c4,c5,c6) -> List.filter (fun carte_tab -> (same_card c1 carte_tab) || (same_card c2 carte_tab) || (same_card c3 carte_tab) || (same_card c4 carte_tab) || (same_card c5 carte_tab) || (same_card c6 carte_tab)) (cree_paquet_carte [])
-  |Main(c1,c2),River(c3,c4,c5,c6,c7) ->List.filter (fun carte_tab -> (same_card c1 carte_tab) || (same_card c2 carte_tab) || (same_card c3 carte_tab) || (same_card c4 carte_tab) || (same_card c5 carte_tab) || (same_card c6 carte_tab)  || (same_card c7 carte_tab)) (cree_paquet_carte [])
-  in liste_carte_pour_d2 
+  |Main(c1,c2),Flop(c3,c4,c5) -> List.filter (fun carte_tab -> not((same_card c1 carte_tab) || (same_card c2 carte_tab) || (same_card c3 carte_tab) || (same_card c4 carte_tab) || (same_card c5 carte_tab))) (cree_paquet_carte [])
+  |Main(c1,c2),Turn(c3,c4,c5,c6) -> List.filter (fun carte_tab -> not((same_card c1 carte_tab) || (same_card c2 carte_tab) || (same_card c3 carte_tab) || (same_card c4 carte_tab) || (same_card c5 carte_tab) || (same_card c6 carte_tab))) (cree_paquet_carte [])
+  |Main(c1,c2),River(c3,c4,c5,c6,c7) ->List.filter (fun carte_tab -> not((same_card c1 carte_tab) || (same_card c2 carte_tab) || (same_card c3 carte_tab) || (same_card c4 carte_tab) || (same_card c5 carte_tab) || (same_card c6 carte_tab)  || (same_card c7 carte_tab))) (cree_paquet_carte [])
+  in let rec toute_donne_d2 liste_carte_pour_d2 l = match liste_carte_pour_d2 with
+       |[] -> l
+       |h::t -> toute_donne_d2 t (add_donne h t l)
+     in let donne_d2 = toute_donne_d2 liste_carte_pour_d2 []
+        in ()
+        
 ;;
    
 let test1 = Suite(Valeur(7));;
@@ -396,3 +407,5 @@ let max2 = combMax compute2;;
 let b = compare_hands main1 main2 table;;
 
 let c = compare_comb test1 test2;;  
+
+let a = proba_simple main1 table;
