@@ -142,7 +142,7 @@ let list_rank tab_rang =
       | 2 -> aux (i+1) (Valeur(i+2)::(Valeur(i+2)::l))
       | 3 -> aux (i+1) (Valeur(i+2)::(Valeur(i+2)::(Valeur(i+2)::l)))
       | 4 -> aux (i+1) (Valeur(i+2)::(Valeur(i+2)::(Valeur(i+2)::(Valeur(i+2)::l))))
-	
+      |_ -> failwith("Mauvaise utilistation de la fonction list_rank")
   in aux 0 []
 ;;
 
@@ -279,7 +279,7 @@ let rec list_comb i lc suite l liste_rang =(*Ajoute les Paire, Brelan et Carre*)
 (*Ajoute CarteHaute a lc*)
 let carteHauteAdd liste_rang lc = match liste_rang with
   | h1::h2::h3::h4::h5::_ -> CarteHaute(h1,h2,h3,h4,h5)::lc
-  | []| _::[]| _::_::[]| _::_::_::[]| _::_::_::_::[] -> failwith("Mauvaise utilisation de la mehtode compute_comb")
+  | []| _::[]| _::_::[]| _::_::_::[]| _::_::_::_::[] -> failwith("Mauvaise utilisation de la mehtode carteHauteAdd")
 ;;
 
 
@@ -333,6 +333,47 @@ let count2 card l coeur pique trefle carreau = match card with
 
 let compute_comb_max d t *)
 
+(*True si c1 = c2 sinon false. Ici c1 et c2 sont des Couleur*) 
+let same_color c1 c2 = match c1,c2 with
+  |(Pique,Pique) |(Coeur,Coeur) |(Carreau,Carreau) |(Trefle,Trefle) -> true
+  |_,_ -> false
+;;
+  
+(*True si card1 = card2 sinon false.Ici card1 et card2 sont des Cartes*)
+let same_card card1 card2 = match card1,card2 with
+  |(Carte (r1,c1)) ,(Carte (r2,c2)) when ((rankToValue r1) = (rankToValue r2)) && (same_color c1 c2) ->  true
+  |_,_ -> false
+;;
+  
+(*Creer une list de valeur pour les rangs*)
+let rec make_list_value i liste_de_rang  = if i < 0 then liste_de_rang else make_list_value (i-1) (Valeur(i+2)::liste_de_rang);;
+   
+
+let rec make_card_with_one_color color valeur liste_des_cartes = match valeur with
+  |[] -> liste_des_cartes
+  |h::t -> make_card_with_one_color color t (Carte(h,color)::liste_des_cartes)
+;;
+  
+let rec init_paquet_carte valeur couleur liste_des_cartes = match couleur with
+  |[] -> liste_des_cartes
+  |h::t -> init_paquet_carte valeur t (make_card_with_one_color h valeur liste_des_cartes)
+;;
+  
+  
+let cree_paquet_carte liste_des_cartes =
+  let couleur = [Pique;Coeur;Carreau;Trefle]
+  and valeur = make_list_value 12 []
+  in init_paquet_carte valeur couleur liste_des_cartes
+;;
+    
+let proba_simple d1 t =
+  let liste_carte_pour_d2 = match d1,t with
+  |Main(c1,c2),Flop(c3,c4,c5) -> List.filter (fun carte_tab -> (same_card c1 carte_tab) || (same_card c2 carte_tab) || (same_card c3 carte_tab) || (same_card c4 carte_tab) || (same_card c5 carte_tab)) (cree_paquet_carte [])
+  |Main(c1,c2),Turn(c3,c4,c5,c6) -> List.filter (fun carte_tab -> (same_card c1 carte_tab) || (same_card c2 carte_tab) || (same_card c3 carte_tab) || (same_card c4 carte_tab) || (same_card c5 carte_tab) || (same_card c6 carte_tab)) (cree_paquet_carte [])
+  |Main(c1,c2),River(c3,c4,c5,c6,c7) ->List.filter (fun carte_tab -> (same_card c1 carte_tab) || (same_card c2 carte_tab) || (same_card c3 carte_tab) || (same_card c4 carte_tab) || (same_card c5 carte_tab) || (same_card c6 carte_tab)  || (same_card c7 carte_tab)) (cree_paquet_carte [])
+  in liste_carte_pour_d2 
+;;
+   
 let test1 = Suite(Valeur(7));;
 let test2 = Suite(Valeur(8));;
 let test3 = Suite(Valeur(9));;
