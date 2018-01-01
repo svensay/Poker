@@ -440,12 +440,22 @@ let make_donne line =
      in Main(make_card_with_string first_card,make_card_with_string second_card)
 ;;
 
+let rec string_to_tabString string tab_String =
+  try
+    let index_space = String.rindex string ' '
+    in string_to_tabString (String.sub string 0 index_space) ((String.sub string (index_space+1) ((String.length string)-(index_space+1)))::tab_String)
+  with
+      Not_found -> string::tab_String
+	
+;;
+
 let make_table string =
-  let tab_table = String.split_on_char (" ") string
+  let tab_table = string_to_tabString string []
   in match tab_table with
     |h1::h2::h3::[] -> Flop(make_card_with_string h1,make_card_with_string h2,make_card_with_string h3)
     |h1::h2::h3::h4::[] -> Turn(make_card_with_string h1,make_card_with_string h2,make_card_with_string h3,make_card_with_string h4)
     |h1::h2::h3::h4::h5::[] -> River(make_card_with_string h1,make_card_with_string h2,make_card_with_string h3,make_card_with_string h4,make_card_with_string h5)
+    |[]|_::[]|_::_::[]|_::_::_::_::_::_::_ -> failwith("Mauvaise ligne de table");
 ;;
 
 let lecture_de_fichier file =
@@ -454,7 +464,19 @@ let lecture_de_fichier file =
        let d1 = make_donne (input_line reader)
        in let d2_string = input_line reader
 	  in let table = make_table (input_line reader)
-	     in d1  
+	     in match d2_string with
+	       |"?" -> print_string("Joueur 1: ");print_float(proba_simple d1 table);print_newline()
+	       |_ -> let d2 = make_donne d2_string
+		     in let proba_d = proba_double d1 d2 table
+			in match proba_d with
+			  |(1.0,0.0) -> print_endline("Le joueur 1 est gagnant.")
+			  |(0.0,1.0) -> print_endline("Le joueur 2 est gagnant.")
+			  |(p1,p2) -> print_string("Joueur 1: ");
+			    print_float(p1);
+			    print_newline();
+			    print_string("Joueur 2: ");
+			    print_float(p2);
+			    print_newline()
     with
       |End_of_file -> failwith("Erreur de fichier")
 ;;
