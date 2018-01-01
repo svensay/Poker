@@ -375,9 +375,30 @@ let rec add_donne card list_card liste_donne_d2 = match list_card with
   | h::t -> add_donne card t (Main(card,h)::liste_donne_d2)
 ;;
 
-let proba_double d1 d2 t = (0.58,0.614)
+(* Supprime les cartes de la donne d de la liste des cartes *)
+let supprimeCartesDonne d l =  match d with
+  | Main(c1,c2) -> List.filter (fun carte -> (not ((same_card c1 carte) || (same_card c2 carte)))) l 
 ;;
-    
+
+let proba_with_compare d1 d2 t =
+  let probaJ1 = compare_hands d1 d2 t in
+  match probaJ1 with
+    | 1 -> (1.0, 0.0)
+    | 0 -> (0.5, 0.5)
+    | -1 -> (0.0, 1.0)  
+;;
+
+let proba_double d1 d2 t =
+  let paquetCarte = cree_paquet_carte [] in
+  let paquetCarteSansD1 = supprimeCartesDonne d1 paquetCarte in
+  let paquetCarteSansD1etD2 = supprimeCartesDonne d2 paquetCarteSansD1 in
+  match t with
+    | River(_,_,_,_,_) -> proba_with_compare d1 d2 t
+    | Turn(_,_,_,_) -> proba_with_compare d1 d2 t
+    | Flop(_,_,_) -> proba_with_compare d1 d2 t
+    | _ -> (0.58,0.614)
+;;
+
 let proba_simple d1 t =
   let liste_carte_pour_d2 = match d1,t with(*Supprime les cartes de d1 et t dans liste_carte_pour_d2*)
   |Main(c1,c2),Flop(c3,c4,c5) -> List.filter (fun carte_tab -> not((same_card c1 carte_tab) || (same_card c2 carte_tab) || (same_card c3 carte_tab) || (same_card c4 carte_tab) || (same_card c5 carte_tab))) (cree_paquet_carte [])
@@ -504,4 +525,9 @@ let b = compare_hands main1 main2 table;;
 
 let c = compare_comb test1 test2;;  
 
-let a = proba_simple main1 table;
+let a = proba_simple main1 table;;
+
+let paquetDeCartesCree = cree_paquet_carte [];;
+let remove1 = supprimeCartesDonne main1 paquetDeCartesCree;;
+let remove2 = supprimeCartesDonne main2 remove1;;
+let testRemove = proba_double main1 main2 table;;
