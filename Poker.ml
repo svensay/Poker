@@ -396,7 +396,69 @@ let proba_simple d1 t =
 		|h::t -> proba_win_d1 t (accumulateur*.h)
 		 in proba_win_d1 tab_prob_d1_win 1.0		 
 ;;
-   
+
+let char_to_valeur char = match char with
+  |'A' -> 14
+  |'R' -> 13
+  |'D' -> 12
+  |'V' -> 11
+  |'1' -> 10
+  |'9' -> 9
+  |'8' -> 8
+  |'7' -> 7
+  |'6' -> 6
+  |'5' -> 5
+  |'4' -> 4
+  |'3' -> 3
+  |'2' -> 2
+  |_ -> failwith("Mauvaise valeur dans le fichier");
+;;
+
+let char_to_color char = match char with
+  |'p' -> Pique
+  |'o' -> Coeur
+  |'a' -> Carreau
+  |'t' -> Trefle
+  |_ -> failwith("Mauvaise valeur dans le fichier");    
+;;
+
+let make_card_with_string string =
+  let valeur = char_to_valeur (String.get string 0)
+  in let color = if valeur = 10 then match (String.get string 2) with
+    |'c' -> char_to_color (String.get string 3)
+    |_ -> char_to_color (String.get string 2)
+    else match (String.get string 1) with
+    |'c' -> char_to_color (String.get string 2)
+    |_ -> char_to_color (String.get string 1)
+     in Carte(Valeur(valeur),color)
+;;
+
+let make_donne line =
+  let index_space = String.rindex line ' '
+  in let first_card = String.sub line 0 index_space
+  and second_card = String.sub line (index_space+1) ((String.length line)-(index_space+1))
+     in Main(make_card_with_string first_card,make_card_with_string second_card)
+;;
+
+let make_table string =
+  let tab_table = String.split_on_char (" ") string
+  in match tab_table with
+    |h1::h2::h3::[] -> Flop(make_card_with_string h1,make_card_with_string h2,make_card_with_string h3)
+    |h1::h2::h3::h4::[] -> Turn(make_card_with_string h1,make_card_with_string h2,make_card_with_string h3,make_card_with_string h4)
+    |h1::h2::h3::h4::h5::[] -> River(make_card_with_string h1,make_card_with_string h2,make_card_with_string h3,make_card_with_string h4,make_card_with_string h5)
+;;
+
+let lecture_de_fichier file =
+  let reader = open_in file
+  in try
+       let d1 = make_donne (input_line reader)
+       in let d2_string = input_line reader
+	  in let table = make_table (input_line reader)
+	     in d1  
+    with
+      |End_of_file -> failwith("Erreur de fichier")
+;;
+
 let test1 = Suite(Valeur(7));;
 let test2 = Suite(Valeur(8));;
 let test3 = Suite(Valeur(9));;
