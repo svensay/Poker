@@ -1,5 +1,3 @@
-open Graphics
-
 type couleur = Pique | Coeur | Carreau | Trefle ;;
 type rang = Valeur of int;;
 type carte = Carte of rang * couleur ;;
@@ -11,8 +9,7 @@ type comb = QuinteFlush of rang
       | Couleur of rang*rang*rang*rang*rang (*en cas d'égalité faut verifier la carte suivante*)
       | Suite of rang
       | Brelan of rang*rang*rang(*suite de 3*)
-      | DoublePaire of rang*rang*rang (*1er rang -> 1er 
-paire, 2éme rang -> 2éme paire, 3éme -> derniére carte*)
+      | DoublePaire of rang*rang*rang (*1er rang -> 1er paire, 2éme rang -> 2éme paire, 3éme -> derniére carte*)
       | Paire of rang*rang*rang*rang(*1er rang -> 1er paire, le reste des rangs sont les cartes qu'on compare en cas d'égalité*)
       | CarteHaute of rang*rang*rang*rang*rang(*Compare la meilleur rang et en cas d'égalité on regarde la prochaine plus forte et ainci de suite*)
 ;;
@@ -604,6 +601,7 @@ let testAntho14 = supprimeCartesTable table2 testAntho13;;
 let testAntho15 = genereTable testAntho14 table2;; 
 let testAntho16 = proba_with_compare_list main1 main2 testAntho15;;
 let testAntho17 = List.length testAntho15;;
+<<<<<<< HEAD
 
 
 open_graph " 500x500";;
@@ -646,3 +644,5 @@ let draw_card carte x y =
 draw_card (Carte(Valeur(14),Pique)) 450 400;;
 (*close_graph*)
 
+=======
+>>>>>>> 87ef5ac92a822f96be386ba6cd4db4e8d8b21d7e
