@@ -1,7 +1,6 @@
 open Poker
 
 let lecture_de_fichier file =
-	printf "%s\n" file;
   	let reader = open_in file
 	in try
 		let d1 = make_donne (input_line reader)
@@ -27,4 +26,4 @@ let lecture_de_fichier file =
       |End_of_file -> failwith("Erreur de fichier")
 ;;
 
-let () = lecture_de_fichier Sys.argv.(2);;
+let () = lecture_de_fichier Sys.argv.(1);;
