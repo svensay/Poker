@@ -2,7 +2,7 @@
 open Graphics;;
 open Poker;;
 
-(* open_graph " 500x500";; *)
+open_graph " 500x500";;
 
 let color_to_string color = match color with
   | Pique -> "p"
@@ -29,7 +29,7 @@ let rank_to_string rank = match rank with
 ;;
 
 
-(* let draw_card carte x y =
+let draw_card carte x y =
   draw_rect x y 25 50;
   match carte with
     |Carte (r,c) -> moveto (x+7) (y+35);
@@ -39,6 +39,6 @@ let rank_to_string rank = match rank with
 ;;
 
 
-draw_card (Carte(Valeur(14),Pique)) 450 400;; *)
+draw_card (Carte(Valeur(14),Pique)) 450 400;;
 (*close_graph*)
 
