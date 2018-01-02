@@ -242,8 +242,8 @@ let rec auxDoubleAndFull combinaison list_comb list_comb_tmp list_rank = match l
 let rec doubleAndFull list_comb list_comb_tmp list_rank = match list_comb_tmp with
   |[] -> list_comb
   |h::t -> match h with
-      |Paire (r1,r2,r3,r4) -> auxDoubleAndFull h list_comb t list_rank
-      |Brelan (r1,r2,r3) ->  auxDoubleAndFull h list_comb t list_rank
+      |Paire (r1,r2,r3,r4) ->  doubleAndFull (auxDoubleAndFull h list_comb t list_rank) t list_rank
+      |Brelan (r1,r2,r3) ->  doubleAndFull (auxDoubleAndFull h list_comb t list_rank) t list_rank
       |_ -> doubleAndFull list_comb t list_rank
 ;;
 
