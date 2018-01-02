@@ -1,3 +1,5 @@
+open Graphics
+
 type couleur = Pique | Coeur | Carreau | Trefle ;;
 type rang = Valeur of int;;
 type carte = Carte of rang * couleur ;;
@@ -516,7 +518,7 @@ let rec string_to_tabString string tab_String =
     in string_to_tabString (String.sub string 0 index_space) ((String.sub string (index_space+1) ((String.length string)-(index_space+1)))::tab_String)
   with
       Not_found -> string::tab_String
-	
+  
 ;;
 
 let make_table string =
@@ -533,20 +535,20 @@ let make_table string =
   in try
        let d1 = make_donne (input_line reader)
        in let d2_string = input_line reader
-	  in let table = make_table (input_line reader)
-	     in match d2_string with
-	       |"?" -> print_string("Joueur 1: ");print_float(proba_simple d1 table);print_newline()
-	       |_ -> let d2 = make_donne d2_string
-		     in let proba_d = proba_double d1 d2 table
-			in match proba_d with
-			  |(1.0,0.0) -> print_endline("Le joueur 1 est gagnant.")
-			  |(0.0,1.0) -> print_endline("Le joueur 2 est gagnant.")
-			  |(p1,p2) -> print_string("Joueur 1: ");
-			    print_float(p1);
-			    print_newline();
-			    print_string("Joueur 2: ");
-			    print_float(p2);
-			    print_newline()
+    in let table = make_table (input_line reader)
+       in match d2_string with
+         |"?" -> print_string("Joueur 1: ");print_float(proba_simple d1 table);print_newline()
+         |_ -> let d2 = make_donne d2_string
+         in let proba_d = proba_double d1 d2 table
+      in match proba_d with
+        |(1.0,0.0) -> print_endline("Le joueur 1 est gagnant.")
+        |(0.0,1.0) -> print_endline("Le joueur 2 est gagnant.")
+        |(p1,p2) -> print_string("Joueur 1: ");
+          print_float(p1);
+          print_newline();
+          print_string("Joueur 2: ");
+          print_float(p2);
+          print_newline()
     with
       |End_of_file -> failwith("Erreur de fichier")
 ;; *)
@@ -603,7 +605,6 @@ let testAntho16 = proba_with_compare_list main1 main2 testAntho15;;
 let testAntho17 = List.length testAntho15;;
 
 
-open Graphics;;
 open_graph " 500x500";;
 
 let color_to_string color = match color with

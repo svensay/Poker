@@ -1,3 +1,5 @@
+open Poker
+
 let lecture_de_fichier file =
   let reader = open_in file
   in try
