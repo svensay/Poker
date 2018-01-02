@@ -39,6 +39,6 @@ let rank_to_string rank = match rank with
 ;;
 
 
-draw_card (Carte(Valeur(14),Pique)) 100 100;; *)
+draw_card (Carte(Valeur(14),Pique)) 450 400;; *)
 (*close_graph*)
 

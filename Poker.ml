@@ -9,10 +9,9 @@ type comb = QuinteFlush of rang
       | Couleur of rang*rang*rang*rang*rang (*en cas d'égalité faut verifier la carte suivante*)
       | Suite of rang
       | Brelan of rang*rang*rang(*suite de 3*)
-      | DoublePaire of rang*rang*rang (*1er rang -> 1er 
-paire, 2éme rang -> 2éme paire, 3éme -> derniére carte*)
+      | DoublePaire of rang*rang*rang (*1er rang -> 1er paire, 2éme rang -> 2éme paire, 3éme -> derniére carte*)
       | Paire of rang*rang*rang*rang(*1er rang -> 1er paire, le reste des rangs sont les cartes qu'on compare en cas d'égalité*)
-      | CarteHaute of rang*rang*rang*rang*rang(*Compare la meilleur rang et en cas d'égalité on regarde la prochaine plus forte et ainci de suite*);;
+      | CarteHaute of rang*rang*rang*rang*rang(*Compare la meilleur rang et en cas d'égalité on regarde la prochaine plus forte et ainci de suite*)
 ;;
 
 (* Compare deux combinaisons "du même type" *)
@@ -214,14 +213,15 @@ let rec doublePairAdd list_rank rang1 rang2 l =
 let findPaire combinaison list_rank list_comb r1 = match combinaison with
   | Paire (k1,k2,k3,k4) -> doublePairAdd list_rank r1 k1 list_comb
   | Brelan (k1,k2,k3) -> Full(k1,r1)::list_comb
-  | _ -> failwith("Mauvaise utilistation de la fonction auxDoubleAndFull")
+  | _ -> failwith("Mauvaise utilistation de la fonction findPaire")
 ;;
 
 (*si combinaison = Paire alors ajoute Full a list_comb*)
 (*Méthode auxiliaire utiliser dans auxDoubleAndFull*)
 let findBrelan combinaison list_comb r1 =  match combinaison with
   | Paire (k1,k2,k3,k4) -> Full(r1,k1)::list_comb
-  |_ -> failwith("Mauvaise utilistation de la fonction auxDoubleAndFull")
+  | Brelan (k1,_,_) -> Full(k1,r1)::list_comb
+  |_ -> failwith("Mauvaise utilistation de la fonction findBrelan")
 ;;
 
 (*Si on trouve un Brelan ou une Paire dans list_comb_tmp, ajoute une DoublePaire ou un Full dans list_comb*)
@@ -445,27 +445,26 @@ let proba_double d1 d2 t =
     | Turn(_,_,_,_) -> proba_with_compare_list d1 d2 (genereTable paquetCarteSansD1etD2etTable t)
     | Flop(_,_,_) -> proba_with_compare_list d1 d2 (genereTable paquetCarteSansD1etD2etTable t)
 ;;
-
-let proba_simple d1 t = (0.5,0.5);;
-
-(* let proba_simple d1 t =
+ 
+let proba_simple d1 t =
   let liste_carte_pour_d2 = match d1,t with(*Supprime les cartes de d1 et t dans liste_carte_pour_d2*)
   |Main(c1,c2),Flop(c3,c4,c5) -> List.filter (fun carte_tab -> not((same_card c1 carte_tab) || (same_card c2 carte_tab) || (same_card c3 carte_tab) || (same_card c4 carte_tab) || (same_card c5 carte_tab))) (cree_paquet_carte [])
   |Main(c1,c2),Turn(c3,c4,c5,c6) -> List.filter (fun carte_tab -> not((same_card c1 carte_tab) || (same_card c2 carte_tab) || (same_card c3 carte_tab) || (same_card c4 carte_tab) || (same_card c5 carte_tab) || (same_card c6 carte_tab))) (cree_paquet_carte [])
   |Main(c1,c2),River(c3,c4,c5,c6,c7) ->List.filter (fun carte_tab -> not((same_card c1 carte_tab) || (same_card c2 carte_tab) || (same_card c3 carte_tab) || (same_card c4 carte_tab) || (same_card c5 carte_tab) || (same_card c6 carte_tab)  || (same_card c7 carte_tab))) (cree_paquet_carte [])
   in let rec toute_donne_d2 liste_carte_pour_d2 liste_donne_d2 = match liste_carte_pour_d2 with(*Creer une liste de toutes les donnes possible pour d2*)
        |[] -> liste_donne_d2
-       |h::t -> toute_donne_d2 t (add_donne h t liste_donne_d2)
+       |h::q -> toute_donne_d2 q (add_donne h q liste_donne_d2)
      in let donne_d2 = toute_donne_d2 liste_carte_pour_d2 []
         in let rec tableau_proba donne_d2 tab_prob_d1_win = match donne_d2 with (*Creer la liste des probabilités de victoire de d1 avec toute les donne possibles de d2*)
 	  |[] -> tab_prob_d1_win
-	  |h::t -> tableau_proba t (fst(proba_double d1 h t)::tab_prob_d1_win)
+	  |h::q -> tableau_proba q (fst(proba_double d1 h t)::tab_prob_d1_win)
 	   in let tab_prob_d1_win = tableau_proba donne_d2 []
 	      in let rec proba_win_d1 tab_prob_d1_win accumulateur = match tab_prob_d1_win with
 		|[] -> accumulateur
-		|h::t -> proba_win_d1 t (accumulateur*.h)
-		 in proba_win_d1 tab_prob_d1_win 1.0		 
-;; *)
+		|h::q -> proba_win_d1 q (accumulateur+.h)
+		 in let proba_d1_sans_div = proba_win_d1 tab_prob_d1_win 0.0
+		    in proba_d1_sans_div/.float_of_int (List.length tab_prob_d1_win)
+;;
 
 let char_to_valeur char = match char with
   |'A' -> 14
@@ -528,7 +527,7 @@ let make_table string =
     |[]|_::[]|_::_::[]|_::_::_::_::_::_::_ -> failwith("Mauvaise ligne de table");
 ;;
 
-(* let lecture_de_fichier file =
+let lecture_de_fichier file =
   let reader = open_in file
   in try
        let d1 = make_donne (input_line reader)
@@ -541,6 +540,7 @@ let make_table string =
       in match proba_d with
         |(1.0,0.0) -> print_endline("Le joueur 1 est gagnant.")
         |(0.0,1.0) -> print_endline("Le joueur 2 est gagnant.")
+	|(0.5,0.5) -> print_endline("Egalité.")
         |(p1,p2) -> print_string("Joueur 1: ");
           print_float(p1);
           print_newline();
@@ -549,7 +549,7 @@ let make_table string =
           print_newline()
     with
       |End_of_file -> failwith("Erreur de fichier")
-;; *)
+;;
 
 let test1 = Suite(Valeur(7));;
 let test2 = Suite(Valeur(8));;
