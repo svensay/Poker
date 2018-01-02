@@ -310,7 +310,7 @@ let combMax l =
 let compare_hands d1 d2 t = 
   let l1 = compute_comb d1 t
   and l2 = compute_comb d2 t in
-  print_comb (combMax l1); print_comb (combMax l2);
+  (* print_comb (combMax l1); print_comb (combMax l2); *)
   compare_comb (combMax l1) (combMax l2) 
 ;;
 
@@ -380,23 +380,71 @@ let supprimeCartesDonne d l =  match d with
   | Main(c1,c2) -> List.filter (fun carte -> (not ((same_card c1 carte) || (same_card c2 carte)))) l 
 ;;
 
+(* Supprime les cartes de la table t de la liste des cartes *)
+let supprimeCartesTable t l =  match t with
+  | Flop (c3,c4,c5) -> List.filter (fun carte -> (not ((same_card c3 carte) || (same_card c4 carte) || (same_card c5 carte)))) l
+  | Turn (c3,c4,c5,c6) -> List.filter (fun carte -> (not ((same_card c3 carte) || (same_card c4 carte) || (same_card c5 carte) || (same_card c6 carte)))) l
+  | _ -> l
+;;
+
+(* Prend un Turn et crée une liste de toutes les River possibles *)
+let listRiverWithTurn t paquet =
+  let rec aux res t paquet = match paquet with
+    | [] -> res
+    | h::q -> match t with
+              | Turn(c1,c2,c3,c4) -> aux ((River(c1,c2,c3,c4,h))::res) t q 
+              | _ -> failwith("Impossible")
+
+  in aux [] t paquet
+;;
+
+(* Prend un Flop et crée une liste de toutes les River possibles *)
+let listRiverWithFlop t paquet =
+  let rec aux res t paquet = match paquet with
+    | [] -> res
+    | h::q -> match t with
+              | Flop(c1,c2,c3) -> aux ((listRiverWithTurn (Turn(c1,c2,c3,h)) q)@res) t q 
+              | _ -> failwith("Impossible")
+
+  in aux [] t paquet
+;;
+
+(* Prend un Flop ou un Turn et renvoit la liste de toutes les River possibles  *)
+let genereTable paquet table = match table with
+    | Turn(_,_,_,_) -> listRiverWithTurn table paquet
+    | Flop(_,_,_) -> listRiverWithFlop table paquet
+    | _ -> failwith("Impossible")
+;;
+
 let proba_with_compare d1 d2 t =
   let probaJ1 = compare_hands d1 d2 t in
   match probaJ1 with
     | 1 -> (1.0, 0.0)
     | 0 -> (0.5, 0.5)
-    | -1 -> (0.0, 1.0)  
+    | -1 -> (0.0, 1.0)
+    | _ -> failwith("Impossible")
+;;
+
+(* Execute proba_with_compare avec une liste de River *)
+let proba_with_compare_list d1 d2 liste_river =
+  let rec aux j1 j2 d1 d2 liste_river = match liste_river with
+    | [] -> (j1,j2)
+    | h::t -> let (x, y) = proba_with_compare d1 d2 h in
+              aux (j1 +. x) (j2 +. y) d1 d2 t
+  in let (resJ1, resJ2) = aux 0. 0. d1 d2 liste_river in
+  ((resJ1 /. float_of_int (List.length liste_river)),(resJ2 /. float_of_int (List.length liste_river)))
 ;;
 
 let proba_double d1 d2 t =
   let paquetCarte = cree_paquet_carte [] in
   let paquetCarteSansD1 = supprimeCartesDonne d1 paquetCarte in
   let paquetCarteSansD1etD2 = supprimeCartesDonne d2 paquetCarteSansD1 in
+  let paquetCarteSansD1etD2etTable = supprimeCartesTable t paquetCarteSansD1etD2 in
   match t with
     | River(_,_,_,_,_) -> proba_with_compare d1 d2 t
-    | Turn(_,_,_,_) -> proba_with_compare d1 d2 t
-    | Flop(_,_,_) -> proba_with_compare d1 d2 t
-    | _ -> (0.58,0.614)
+    | Turn(_,_,_,_) -> proba_with_compare_list d1 d2 (genereTable paquetCarteSansD1etD2etTable t)
+    | Flop(_,_,_) -> proba_with_compare_list d1 d2 (genereTable paquetCarteSansD1etD2etTable t)
+    | _ -> failwith("Impossible car on suppose qu'il y a au moins 3 cartes sur la table");
 ;;
 
 let proba_simple d1 t =
@@ -515,6 +563,7 @@ let max = combMax lstComb;;
 let main1 = Main(Carte(Valeur(3),Pique),Carte(Valeur(2),Coeur));;
 let main2 = Main(Carte(Valeur(13),Pique),Carte(Valeur(8),Coeur));;
 let table = River(Carte(Valeur(9),Coeur),Carte(Valeur(14),Pique),Carte(Valeur(5),Pique),Carte(Valeur(4),Pique),Carte(Valeur(2),Pique));;
+let table2 = Turn(Carte(Valeur(9),Coeur),Carte(Valeur(14),Pique),Carte(Valeur(5),Pique),Carte(Valeur(4),Pique));;
 
 let compute1 = compute_comb main1 table;;
 let compute2 = compute_comb main2 table;;
@@ -531,7 +580,8 @@ let a = proba_simple main1 table;;
 let paquetDeCartesCree = cree_paquet_carte [];;
 let remove1 = supprimeCartesDonne main1 paquetDeCartesCree;;
 let remove2 = supprimeCartesDonne main2 remove1;;
-let testRemove = proba_double main1 main2 table;;
+let testprobaDouble1 = proba_double main1 main2 table;;
+let testprobaDouble2 = proba_double main1 main2 table2;;
 
 open Graphics;;
 open_graph " 500x500";;
