@@ -399,14 +399,14 @@ let listRiverWithTurn t paquet =
 ;;
 
 (* Prend un Flop et crée une liste de toutes les River possibles *)
-let listRiverWithFlop t paquet =
-  let rec aux res t paquet = match paquet with
+let listRiverWithFlop f paquet =
+  let rec aux res f paquet = match paquet with
     | [] -> res
-    | h::q -> match t with
-              | Flop(c1,c2,c3) -> aux ((listRiverWithTurn (Turn(c1,c2,c3,h)) q)@res) t q 
+    | h::q -> match f with
+              | Flop(c1,c2,c3) -> aux ((listRiverWithTurn (Turn(c1,c2,c3,h)) q)@res) f q 
               | _ -> failwith("Impossible")
 
-  in aux [] t paquet
+  in aux [] f paquet
 ;;
 
 (* Prend un Flop ou un Turn et renvoit la liste de toutes les River possibles  *)
@@ -564,6 +564,7 @@ let main1 = Main(Carte(Valeur(3),Pique),Carte(Valeur(2),Coeur));;
 let main2 = Main(Carte(Valeur(13),Pique),Carte(Valeur(8),Coeur));;
 let table = River(Carte(Valeur(9),Coeur),Carte(Valeur(14),Pique),Carte(Valeur(5),Pique),Carte(Valeur(4),Pique),Carte(Valeur(2),Pique));;
 let table2 = Turn(Carte(Valeur(9),Coeur),Carte(Valeur(14),Pique),Carte(Valeur(5),Pique),Carte(Valeur(4),Pique));;
+let table3 = Flop(Carte(Valeur(9),Coeur),Carte(Valeur(14),Pique),Carte(Valeur(5),Pique));;
 
 let compute1 = compute_comb main1 table;;
 let compute2 = compute_comb main2 table;;
@@ -582,6 +583,24 @@ let remove1 = supprimeCartesDonne main1 paquetDeCartesCree;;
 let remove2 = supprimeCartesDonne main2 remove1;;
 let testprobaDouble1 = proba_double main1 main2 table;;
 let testprobaDouble2 = proba_double main1 main2 table2;;
+let testprobaDouble3 = proba_double main1 main2 table3;;
+
+let testAntho1 = cree_paquet_carte [];;
+let testAntho2 = supprimeCartesDonne main1 testAntho1;;
+let testAntho3 = supprimeCartesDonne main2 testAntho2;;
+let testAntho4 = supprimeCartesTable table3 testAntho3;;
+let testAntho5 = genereTable testAntho4 table3;; 
+let testAntho6 = proba_with_compare_list main1 main2 testAntho5;;
+let testAntho7 = List.length testAntho5;;
+
+let testAntho11 = cree_paquet_carte [];;
+let testAntho12 = supprimeCartesDonne main1 testAntho11;;
+let testAntho13 = supprimeCartesDonne main2 testAntho12;;
+let testAntho14 = supprimeCartesTable table2 testAntho13;;
+let testAntho15 = genereTable testAntho14 table2;; 
+let testAntho16 = proba_with_compare_list main1 main2 testAntho15;;
+let testAntho17 = List.length testAntho15;;
+
 
 open Graphics;;
 open_graph " 500x500";;
