@@ -601,8 +601,6 @@ let testAntho14 = supprimeCartesTable table2 testAntho13;;
 let testAntho15 = genereTable testAntho14 table2;; 
 let testAntho16 = proba_with_compare_list main1 main2 testAntho15;;
 let testAntho17 = List.length testAntho15;;
-<<<<<<< HEAD
-
 
 open_graph " 500x500";;
 
@@ -643,6 +641,3 @@ let draw_card carte x y =
 
 draw_card (Carte(Valeur(14),Pique)) 450 400;;
 (*close_graph*)
-
-=======
->>>>>>> 87ef5ac92a822f96be386ba6cd4db4e8d8b21d7e
