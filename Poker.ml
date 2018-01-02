@@ -645,3 +645,4 @@ let draw_card carte x y =
 
 draw_card (Carte(Valeur(14),Pique)) 450 400;;
 (*close_graph*)
+
