@@ -1,3 +1,5 @@
+open Graphics
+
 type couleur = Pique | Coeur | Carreau | Trefle ;;
 type rang = Valeur of int;;
 type carte = Carte of rang * couleur ;;
@@ -310,7 +312,7 @@ let combMax l =
 let compare_hands d1 d2 t = 
   let l1 = compute_comb d1 t
   and l2 = compute_comb d2 t in
-  print_comb (combMax l1); print_comb (combMax l2);
+  (* print_comb (combMax l1); print_comb (combMax l2); *)
   compare_comb (combMax l1) (combMax l2) 
 ;;
 
@@ -375,10 +377,80 @@ let rec add_donne card list_card liste_donne_d2 = match list_card with
   | h::t -> add_donne card t (Main(card,h)::liste_donne_d2)
 ;;
 
-let proba_double d1 d2 t = (0.58,0.614)
+(* Supprime les cartes de la donne d de la liste des cartes *)
+let supprimeCartesDonne d l =  match d with
+  | Main(c1,c2) -> List.filter (fun carte -> (not ((same_card c1 carte) || (same_card c2 carte)))) l 
 ;;
-    
-let proba_simple d1 t =
+
+(* Supprime les cartes de la table t de la liste des cartes *)
+let supprimeCartesTable t l =  match t with
+  | Flop (c3,c4,c5) -> List.filter (fun carte -> (not ((same_card c3 carte) || (same_card c4 carte) || (same_card c5 carte)))) l
+  | Turn (c3,c4,c5,c6) -> List.filter (fun carte -> (not ((same_card c3 carte) || (same_card c4 carte) || (same_card c5 carte) || (same_card c6 carte)))) l
+  | _ -> l
+;;
+
+(* Prend un Turn et crée une liste de toutes les River possibles *)
+let listRiverWithTurn t paquet =
+  let rec aux res t paquet = match paquet with
+    | [] -> res
+    | h::q -> match t with
+              | Turn(c1,c2,c3,c4) -> aux ((River(c1,c2,c3,c4,h))::res) t q 
+              | _ -> failwith("Impossible")
+
+  in aux [] t paquet
+;;
+
+(* Prend un Flop et crée une liste de toutes les River possibles *)
+let listRiverWithFlop f paquet =
+  let rec aux res f paquet = match paquet with
+    | [] -> res
+    | h::q -> match f with
+              | Flop(c1,c2,c3) -> aux ((listRiverWithTurn (Turn(c1,c2,c3,h)) q)@res) f q 
+              | _ -> failwith("Impossible")
+
+  in aux [] f paquet
+;;
+
+(* Prend un Flop ou un Turn et renvoit la liste de toutes les River possibles  *)
+let genereTable paquet table = match table with
+    | Turn(_,_,_,_) -> listRiverWithTurn table paquet
+    | Flop(_,_,_) -> listRiverWithFlop table paquet
+    | _ -> failwith("Impossible")
+;;
+
+let proba_with_compare d1 d2 t =
+  let probaJ1 = compare_hands d1 d2 t in
+  match probaJ1 with
+    | 1 -> (1.0, 0.0)
+    | 0 -> (0.5, 0.5)
+    | -1 -> (0.0, 1.0)
+    | _ -> failwith("Impossible")
+;;
+
+(* Execute proba_with_compare avec une liste de River *)
+let proba_with_compare_list d1 d2 liste_river =
+  let rec aux j1 j2 d1 d2 liste_river = match liste_river with
+    | [] -> (j1,j2)
+    | h::t -> let (x, y) = proba_with_compare d1 d2 h in
+              aux (j1 +. x) (j2 +. y) d1 d2 t
+  in let (resJ1, resJ2) = aux 0. 0. d1 d2 liste_river in
+  ((resJ1 /. float_of_int (List.length liste_river)),(resJ2 /. float_of_int (List.length liste_river)))
+;;
+
+let proba_double d1 d2 t =
+  let paquetCarte = cree_paquet_carte [] in
+  let paquetCarteSansD1 = supprimeCartesDonne d1 paquetCarte in
+  let paquetCarteSansD1etD2 = supprimeCartesDonne d2 paquetCarteSansD1 in
+  let paquetCarteSansD1etD2etTable = supprimeCartesTable t paquetCarteSansD1etD2 in
+  match t with
+    | River(_,_,_,_,_) -> proba_with_compare d1 d2 t
+    | Turn(_,_,_,_) -> proba_with_compare_list d1 d2 (genereTable paquetCarteSansD1etD2etTable t)
+    | Flop(_,_,_) -> proba_with_compare_list d1 d2 (genereTable paquetCarteSansD1etD2etTable t)
+;;
+
+let proba_simple d1 t = (0.5,0.5);;
+
+(* let proba_simple d1 t =
   let liste_carte_pour_d2 = match d1,t with(*Supprime les cartes de d1 et t dans liste_carte_pour_d2*)
   |Main(c1,c2),Flop(c3,c4,c5) -> List.filter (fun carte_tab -> not((same_card c1 carte_tab) || (same_card c2 carte_tab) || (same_card c3 carte_tab) || (same_card c4 carte_tab) || (same_card c5 carte_tab))) (cree_paquet_carte [])
   |Main(c1,c2),Turn(c3,c4,c5,c6) -> List.filter (fun carte_tab -> not((same_card c1 carte_tab) || (same_card c2 carte_tab) || (same_card c3 carte_tab) || (same_card c4 carte_tab) || (same_card c5 carte_tab) || (same_card c6 carte_tab))) (cree_paquet_carte [])
@@ -395,7 +467,7 @@ let proba_simple d1 t =
 		|[] -> accumulateur
 		|h::t -> proba_win_d1 t (accumulateur*.h)
 		 in proba_win_d1 tab_prob_d1_win 1.0		 
-;;
+;; *)
 
 let char_to_valeur char = match char with
   |'A' -> 14
@@ -446,7 +518,7 @@ let rec string_to_tabString string tab_String =
     in string_to_tabString (String.sub string 0 index_space) ((String.sub string (index_space+1) ((String.length string)-(index_space+1)))::tab_String)
   with
       Not_found -> string::tab_String
-	
+  
 ;;
 
 let make_table string =
@@ -458,28 +530,28 @@ let make_table string =
     |[]|_::[]|_::_::[]|_::_::_::_::_::_::_ -> failwith("Mauvaise ligne de table");
 ;;
 
-let lecture_de_fichier file =
+(* let lecture_de_fichier file =
   let reader = open_in file
   in try
        let d1 = make_donne (input_line reader)
        in let d2_string = input_line reader
-	  in let table = make_table (input_line reader)
-	     in match d2_string with
-	       |"?" -> print_string("Joueur 1: ");print_float(proba_simple d1 table);print_newline()
-	       |_ -> let d2 = make_donne d2_string
-		     in let proba_d = proba_double d1 d2 table
-			in match proba_d with
-			  |(1.0,0.0) -> print_endline("Le joueur 1 est gagnant.")
-			  |(0.0,1.0) -> print_endline("Le joueur 2 est gagnant.")
-			  |(p1,p2) -> print_string("Joueur 1: ");
-			    print_float(p1);
-			    print_newline();
-			    print_string("Joueur 2: ");
-			    print_float(p2);
-			    print_newline()
+    in let table = make_table (input_line reader)
+       in match d2_string with
+         |"?" -> print_string("Joueur 1: ");print_float(proba_simple d1 table);print_newline()
+         |_ -> let d2 = make_donne d2_string
+         in let proba_d = proba_double d1 d2 table
+      in match proba_d with
+        |(1.0,0.0) -> print_endline("Le joueur 1 est gagnant.")
+        |(0.0,1.0) -> print_endline("Le joueur 2 est gagnant.")
+        |(p1,p2) -> print_string("Joueur 1: ");
+          print_float(p1);
+          print_newline();
+          print_string("Joueur 2: ");
+          print_float(p2);
+          print_newline()
     with
       |End_of_file -> failwith("Erreur de fichier")
-;;
+;; *)
 
 let test1 = Suite(Valeur(7));;
 let test2 = Suite(Valeur(8));;
@@ -494,6 +566,8 @@ let max = combMax lstComb;;
 let main1 = Main(Carte(Valeur(3),Pique),Carte(Valeur(2),Coeur));;
 let main2 = Main(Carte(Valeur(13),Pique),Carte(Valeur(8),Coeur));;
 let table = River(Carte(Valeur(9),Coeur),Carte(Valeur(14),Pique),Carte(Valeur(5),Pique),Carte(Valeur(4),Pique),Carte(Valeur(2),Pique));;
+let table2 = Turn(Carte(Valeur(9),Coeur),Carte(Valeur(14),Pique),Carte(Valeur(5),Pique),Carte(Valeur(4),Pique));;
+let table3 = Flop(Carte(Valeur(9),Coeur),Carte(Valeur(14),Pique),Carte(Valeur(5),Pique));;
 
 let compute1 = compute_comb main1 table;;
 let compute2 = compute_comb main2 table;;
@@ -506,7 +580,31 @@ let c = compare_comb test1 test2;;
 
 let a = proba_simple main1 table;;
 
-open Graphics;;
+
+let paquetDeCartesCree = cree_paquet_carte [];;
+let remove1 = supprimeCartesDonne main1 paquetDeCartesCree;;
+let remove2 = supprimeCartesDonne main2 remove1;;
+let testprobaDouble1 = proba_double main1 main2 table;;
+let testprobaDouble2 = proba_double main1 main2 table2;;
+let testprobaDouble3 = proba_double main1 main2 table3;;
+
+let testAntho1 = cree_paquet_carte [];;
+let testAntho2 = supprimeCartesDonne main1 testAntho1;;
+let testAntho3 = supprimeCartesDonne main2 testAntho2;;
+let testAntho4 = supprimeCartesTable table3 testAntho3;;
+let testAntho5 = genereTable testAntho4 table3;; 
+let testAntho6 = proba_with_compare_list main1 main2 testAntho5;;
+let testAntho7 = List.length testAntho5;;
+
+let testAntho11 = cree_paquet_carte [];;
+let testAntho12 = supprimeCartesDonne main1 testAntho11;;
+let testAntho13 = supprimeCartesDonne main2 testAntho12;;
+let testAntho14 = supprimeCartesTable table2 testAntho13;;
+let testAntho15 = genereTable testAntho14 table2;; 
+let testAntho16 = proba_with_compare_list main1 main2 testAntho15;;
+let testAntho17 = List.length testAntho15;;
+
+
 open_graph " 500x500";;
 
 let color_to_string color = match color with
@@ -546,5 +644,4 @@ let draw_card carte x y =
 
 draw_card (Carte(Valeur(14),Pique)) 450 400;;
 (*close_graph*)
-
 
