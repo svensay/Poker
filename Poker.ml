@@ -12,7 +12,7 @@ type comb = QuinteFlush of rang
       | DoublePaire of rang*rang*rang (*1er rang -> 1er 
 paire, 2éme rang -> 2éme paire, 3éme -> derniére carte*)
       | Paire of rang*rang*rang*rang(*1er rang -> 1er paire, le reste des rangs sont les cartes qu'on compare en cas d'égalité*)
-      | CarteHaute of rang*rang*rang*rang*rang(*Compare la meilleur rang et en cas d'égalité on regarde la prochaine plus forte et ainci de suite*);;
+      | CarteHaute of rang*rang*rang*rang*rang(*Compare la meilleur rang et en cas d'égalité on regarde la prochaine plus forte et ainci de suite*)
 ;;
 
 (* Compare deux combinaisons "du même type" *)
@@ -544,7 +544,7 @@ let draw_card carte x y =
 ;;
 
 
-draw_card (Carte(Valeur(14),Pique)) 100 100;;
+draw_card (Carte(Valeur(14),Pique)) 450 400;;
 (*close_graph*)
 
 
