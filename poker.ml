@@ -444,10 +444,11 @@ let proba_double d1 d2 t =
     | River(_,_,_,_,_) -> proba_with_compare d1 d2 t
     | Turn(_,_,_,_) -> proba_with_compare_list d1 d2 (genereTable paquetCarteSansD1etD2etTable t)
     | Flop(_,_,_) -> proba_with_compare_list d1 d2 (genereTable paquetCarteSansD1etD2etTable t)
-    | _ -> failwith("Impossible car on suppose qu'il y a au moins 3 cartes sur la table");
 ;;
 
-let proba_simple d1 t =
+let proba_simple d1 t = (0.5,0.5);;
+
+(* let proba_simple d1 t =
   let liste_carte_pour_d2 = match d1,t with(*Supprime les cartes de d1 et t dans liste_carte_pour_d2*)
   |Main(c1,c2),Flop(c3,c4,c5) -> List.filter (fun carte_tab -> not((same_card c1 carte_tab) || (same_card c2 carte_tab) || (same_card c3 carte_tab) || (same_card c4 carte_tab) || (same_card c5 carte_tab))) (cree_paquet_carte [])
   |Main(c1,c2),Turn(c3,c4,c5,c6) -> List.filter (fun carte_tab -> not((same_card c1 carte_tab) || (same_card c2 carte_tab) || (same_card c3 carte_tab) || (same_card c4 carte_tab) || (same_card c5 carte_tab) || (same_card c6 carte_tab))) (cree_paquet_carte [])
@@ -464,7 +465,7 @@ let proba_simple d1 t =
 		|[] -> accumulateur
 		|h::t -> proba_win_d1 t (accumulateur*.h)
 		 in proba_win_d1 tab_prob_d1_win 1.0		 
-;;
+;; *)
 
 let char_to_valeur char = match char with
   |'A' -> 14
@@ -527,7 +528,7 @@ let make_table string =
     |[]|_::[]|_::_::[]|_::_::_::_::_::_::_ -> failwith("Mauvaise ligne de table");
 ;;
 
-let lecture_de_fichier file =
+(* let lecture_de_fichier file =
   let reader = open_in file
   in try
        let d1 = make_donne (input_line reader)
@@ -548,7 +549,7 @@ let lecture_de_fichier file =
 			    print_newline()
     with
       |End_of_file -> failwith("Erreur de fichier")
-;;
+;; *)
 
 let test1 = Suite(Valeur(7));;
 let test2 = Suite(Valeur(8));;
