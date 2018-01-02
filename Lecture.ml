@@ -1,14 +1,15 @@
 open Poker
 
 let lecture_de_fichier file =
-  let reader = open_in file
-  in try
-       let d1 = make_donne (input_line reader)
-       in let d2_string = input_line reader
-	  in let table = make_table (input_line reader)
-	     in match d2_string with
+	printf "%s\n" file;
+  	let reader = open_in file
+	in try
+		let d1 = make_donne (input_line reader)
+		in let d2_string = input_line reader
+   		in let table = make_table (input_line reader)
+   		in match d2_string with
 	       |"?" -> print_string("Joueur 1: ");
-	       		   let (x, y) = proba_simple d1 table in
+	       		let (x, y) = proba_simple d1 table in
 	       		   print_float x; print_float y;
 	       		   print_newline();
 	       |_ -> let d2 = make_donne d2_string
@@ -25,3 +26,5 @@ let lecture_de_fichier file =
     with
       |End_of_file -> failwith("Erreur de fichier")
 ;;
+
+let () = lecture_de_fichier Sys.argv.(2);;
