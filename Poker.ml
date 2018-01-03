@@ -545,6 +545,8 @@ let proba_simple d1 t =
 		    in proba_d1_sans_div/.float_of_int (List.length tab_prob_d1_win)
 ;; *)
 
+exception SYNTAXE_ERROR;;
+
 let char_to_valeur char = match char with
   |'A' -> 14
   |'R' -> 13
@@ -559,7 +561,7 @@ let char_to_valeur char = match char with
   |'4' -> 4
   |'3' -> 3
   |'2' -> 2
-  |_ -> failwith("Mauvaise valeur dans le fichier");
+  |_ -> raise(SYNTAXE_ERROR)
 ;;
 
 let char_to_color char = match char with
@@ -567,7 +569,7 @@ let char_to_color char = match char with
   |'o' -> Coeur
   |'a' -> Carreau
   |'t' -> Trefle
-  |_ -> failwith("Mauvaise valeur dans le fichier");    
+  |_ -> raise(SYNTAXE_ERROR)
 ;;
 
 let make_card_with_string string =
@@ -603,7 +605,7 @@ let make_table string =
     |h1::h2::h3::[] -> Flop(make_card_with_string h1,make_card_with_string h2,make_card_with_string h3)
     |h1::h2::h3::h4::[] -> Turn(make_card_with_string h1,make_card_with_string h2,make_card_with_string h3,make_card_with_string h4)
     |h1::h2::h3::h4::h5::[] -> River(make_card_with_string h1,make_card_with_string h2,make_card_with_string h3,make_card_with_string h4,make_card_with_string h5)
-    |[]|_::[]|_::_::[]|_::_::_::_::_::_::_ -> failwith("Mauvaise ligne de table");
+    |[]|_::[]|_::_::[]|_::_::_::_::_::_::_ ->raise(SYNTAXE_ERROR)
 ;;
 
 let test1 = Suite(Valeur(7));;
