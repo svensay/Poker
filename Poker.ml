@@ -279,7 +279,7 @@ let rec list_comb i lc suite l liste_rang =(*Ajoute les Paire, Brelan et Carre*)
 (*Ajoute CarteHaute a lc*)
 let carteHauteAdd liste_rang lc = match liste_rang with
   | h1::h2::h3::h4::h5::_ -> CarteHaute(h1,h2,h3,h4,h5)::lc
-  | []| _::[]| _::_::[]| _::_::_::[]| _::_::_::_::[] -> failwith("Mauvaise utilisation de la mehtode carteHauteAdd")
+  | []| _::[]| _::_::[]| _::_::_::[]| _::_::_::_::[] -> failwith("Mauvaise utilisation de la methode carteHauteAdd")
 ;;
 
 
@@ -384,7 +384,7 @@ let supprimeCartesDonne d l =  match d with
 let supprimeCartesTable t l =  match t with
   | Flop (c3,c4,c5) -> List.filter (fun carte -> (not ((same_card c3 carte) || (same_card c4 carte) || (same_card c5 carte)))) l
   | Turn (c3,c4,c5,c6) -> List.filter (fun carte -> (not ((same_card c3 carte) || (same_card c4 carte) || (same_card c5 carte) || (same_card c6 carte)))) l
-  | _ -> l
+  | River (c3,c4,c5,c6,c7) -> List.filter (fun carte -> (not ((same_card c3 carte) || (same_card c4 carte) || (same_card c5 carte) || (same_card c6 carte) || (same_card c7 carte)))) l
 ;;
 
 (* Prend un Turn et crée une liste de toutes les River possibles *)
@@ -416,6 +416,9 @@ let genereTable paquet table = match table with
     | _ -> failwith("Impossible")
 ;;
 
+(* Prend une table et enleve les cartes de la donne d de cette table *)
+(* let enleveDonneTable d table = *)
+
 let proba_with_compare d1 d2 t =
   let probaJ1 = compare_hands d1 d2 t in
   match probaJ1 with
@@ -442,11 +445,87 @@ let proba_double d1 d2 t =
   let paquetCarteSansD1etD2etTable = supprimeCartesTable t paquetCarteSansD1etD2 in
   match t with
     | River(_,_,_,_,_) -> proba_with_compare d1 d2 t
-    | Turn(_,_,_,_) -> proba_with_compare_list d1 d2 (genereTable paquetCarteSansD1etD2etTable t)
-    | Flop(_,_,_) -> proba_with_compare_list d1 d2 (genereTable paquetCarteSansD1etD2etTable t)
+    | Turn(_,_,_,_) | Flop(_,_,_) -> proba_with_compare_list d1 d2 (genereTable paquetCarteSansD1etD2etTable t)
 ;;
  
-let proba_simple d1 t =
+
+let genererListeMainAux elt l =
+  let rec aux res l = match l with
+    | [] -> res
+    | h::t -> aux (Main(elt, h)::res) t
+  in aux [] l 
+;;
+
+
+(*  creer une liste de donne possible à partir d'une liste l de carte*)
+let genererListeMain l = 
+  let rec aux res l = match l with
+    | [] -> res
+    | h::t -> aux ((genererListeMainAux h t)@res) t
+  in aux [] l
+;;
+
+(* let rec estDejaPresent elt l = match elt, l with
+  | Main(_,_), [] -> false
+  | Main(c1, c2), h::t -> match h with
+                          | Main(c3, c4) -> if ((same_card c1 c3 && same_card c2 c4) || (same_card c1 c4 && same_card c2 c3)) then true
+                                            else estDejaPresent elt t 
+;; *)
+
+(* let removeDoublon l = 
+  let rec aux res l = match l with
+    | [] -> res
+    | h::t -> if (estDejaPresent h t) then aux res t
+              else aux (h::res) t
+  in aux [] l
+;;       
+
+let teeeeest d1 t =
+  let paquetCarte = cree_paquet_carte [] in
+  let paquetCarteSansD1 = supprimeCartesDonne d1 paquetCarte in
+  supprimeCartesTable t paquetCarteSansD1
+;; *)
+
+
+(* let proba_with_compare_list d1 d2 liste_river =
+  let rec aux j1 j2 d1 d2 liste_river = match liste_river with
+    | [] -> (j1,j2)
+    | h::t -> let (x, y) = proba_with_compare d1 d2 h in
+              aux (j1 +. x) (j2 +. y) d1 d2 t
+  in let (resJ1, resJ2) = aux 0. 0. d1 d2 liste_river in
+  ((resJ1 /. float_of_int (List.length liste_river)),(resJ2 /. float_of_int (List.length liste_river)))
+ *)
+ 
+let proba_simple_aux d1 d2 t =
+  let rec aux j1 d1 d2 t = match t with
+    | [] -> j1
+    | h::q -> let (x,_) = proba_double d1 d2 h in
+              if x = 1. then aux (j1 +. x) d1 d2 q
+              else aux j1 d1 d2 q
+  in let resJ1 = aux 0. d1 d2 t in
+  (resJ1 /. float_of_int (List.length t))
+;;
+
+let proba_simple d1 t = 
+  let paquetCarte = cree_paquet_carte [] in
+  let paquetCarteSansD1 = supprimeCartesDonne d1 paquetCarte in
+  let paquetCarteSansD1EtTable = supprimeCartesTable t paquetCarteSansD1 in
+  let listeDonneD2Possible = genererListeMain paquetCarteSansD1EtTable in
+  let rec aux res l = match l with
+    | [] -> res
+    | h::q -> match t with
+              | River(_,_,_,_,_) ->  let (x,_) = proba_double d1 h t in
+                                      if x = 1. then aux (x +. res) q
+                                      else aux res q
+              | Turn(_,_,_,_) | Flop(_,_,_) -> 
+                let aAjouterAuResultat = proba_simple_aux d1 h (genereTable (supprimeCartesDonne h paquetCarteSansD1EtTable) t) in
+                aux (aAjouterAuResultat +. res) q
+  in let somme = aux 0. listeDonneD2Possible in
+  (somme /. float_of_int (List.length listeDonneD2Possible))
+;;
+
+
+(* let proba_simple d1 t =
   let liste_carte_pour_d2 = match d1,t with(*Supprime les cartes de d1 et t dans liste_carte_pour_d2*)
   |Main(c1,c2),Flop(c3,c4,c5) -> List.filter (fun carte_tab -> not((same_card c1 carte_tab) || (same_card c2 carte_tab) || (same_card c3 carte_tab) || (same_card c4 carte_tab) || (same_card c5 carte_tab))) (cree_paquet_carte [])
   |Main(c1,c2),Turn(c3,c4,c5,c6) -> List.filter (fun carte_tab -> not((same_card c1 carte_tab) || (same_card c2 carte_tab) || (same_card c3 carte_tab) || (same_card c4 carte_tab) || (same_card c5 carte_tab) || (same_card c6 carte_tab))) (cree_paquet_carte [])
@@ -464,7 +543,7 @@ let proba_simple d1 t =
 		|h::q -> proba_win_d1 q (accumulateur+.h)
 		 in let proba_d1_sans_div = proba_win_d1 tab_prob_d1_win 0.0
 		    in proba_d1_sans_div/.float_of_int (List.length tab_prob_d1_win)
-;;
+;; *)
 
 let char_to_valeur char = match char with
   |'A' -> 14
@@ -527,30 +606,6 @@ let make_table string =
     |[]|_::[]|_::_::[]|_::_::_::_::_::_::_ -> failwith("Mauvaise ligne de table");
 ;;
 
-let lecture_de_fichier file =
-  let reader = open_in file
-  in try
-       let d1 = make_donne (input_line reader)
-       in let d2_string = input_line reader
-    in let table = make_table (input_line reader)
-       in match d2_string with
-         |"?" -> print_string("Joueur 1: ");print_float(proba_simple d1 table);print_newline()
-         |_ -> let d2 = make_donne d2_string
-         in let proba_d = proba_double d1 d2 table
-      in match proba_d with
-        |(1.0,0.0) -> print_endline("Le joueur 1 est gagnant.")
-        |(0.0,1.0) -> print_endline("Le joueur 2 est gagnant.")
-	|(0.5,0.5) -> print_endline("Egalité.")
-        |(p1,p2) -> print_string("Joueur 1: ");
-          print_float(p1);
-          print_newline();
-          print_string("Joueur 2: ");
-          print_float(p2);
-          print_newline()
-    with
-      |End_of_file -> failwith("Erreur de fichier")
-;;
-
 let test1 = Suite(Valeur(7));;
 let test2 = Suite(Valeur(8));;
 let test3 = Suite(Valeur(9));;
@@ -608,3 +663,32 @@ let wtf3 = River(Carte(Valeur(14),Trefle),Carte(Valeur(14),Trefle),Carte(Valeur(
 let wtf4 = combMax (compute_comb wtf1 wtf3);;
 let wtf6 = combMax (compute_comb wtf2 wtf3);;
 let wtf5 = compute_comb wtf2 wtf3;;
+(* 
+let bonjour1 = proba_simple main1 table;;
+let bonjour2 = proba_simple main2 table;;
+let bonjour3 = teeeeest main1 table;;
+let bonjour4 = List.length bonjour3;;
+ *)
+
+let colorToString c = match c with
+  | Pique -> "Pique"
+  | Coeur -> "Coeur"
+  | Carreau -> "Carreau"
+  | Trefle -> "Trefle"
+;;
+
+
+let print_card c = match c with
+  | Carte (r1, c1) -> print_rang r1; print_newline (); print_endline (colorToString c1); print_newline ();
+;;
+
+let print_main m = match m with
+  | Main (c1,c2) -> print_card c1; print_card c2; 
+;;
+
+let rec print_list = function 
+[] -> ()
+| e::l -> print_main e; print_list l
+;;
+
+(* print_list bonjour3;; *)
