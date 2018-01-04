@@ -399,7 +399,7 @@ let listRiverWithTurn t paquet =
 ;;
 
 (* Prend un Flop et crée une liste de toutes les River possibles *)
-let listRiverWithFlop f paquet =
+let listRiverWithFlopOld f paquet =
   let rec aux res f paquet = match paquet with
     | [] -> res
     | h::q -> match f with
@@ -411,14 +411,14 @@ let listRiverWithFlop f paquet =
 
 
 (* Prend un Flop et crée une liste de toutes les River possibles *)
-let listRiverWithFlopNewMaisMemeComplexiteVoirPire f paquet =
+let listRiverWithFlop f paquet =
   let rec aux res f paquet = match paquet with
     | [] -> res
     | h::q -> match f with
               | Flop(c1,c2,c3) -> let rec aux2 res2 paquet = match paquet with
-                                    | [] -> res2
+                                    | [] -> aux res2 f q 
                                     | h2::q2 -> aux2 (River(c1,c2,c3,h,h2)::res2) q2
-                                  in aux ((aux2 [] q)@res) f q  
+                                  in aux2 res q  
 
               | _ -> failwith("Impossible")
 
@@ -544,8 +544,8 @@ let proba_simple d1 t =
                                       if x = 1. then aux (x +. res) q
                                       else aux res q
               | Turn(_,_,_,_) | Flop(_,_,_) -> 
-                let aAjouterAuResultat = proba_simple_aux d1 h (genereTable (supprimeCartesDonne h paquetCarteSansD1EtTable) t) in
-                aux (aAjouterAuResultat +. res) q
+                        let aAjouterAuResultat = proba_simple_aux d1 h (genereTable (supprimeCartesDonne h paquetCarteSansD1EtTable) t) in
+                        aux (aAjouterAuResultat +. res) q
   in let somme = aux 0. listeDonneD2Possible in
   (somme /. float_of_int (List.length listeDonneD2Possible))
   (* somme *)
@@ -731,6 +731,7 @@ let rec print_list = function
 let new1 = Main(Carte(Valeur(3),Coeur),Carte(Valeur(2),Pique));;
 let new2 = Main(Carte(Valeur(2),Carreau),Carte(Valeur(4),Trefle));;
 let new3 = Flop(Carte(Valeur(14),Trefle),Carte(Valeur(14),Carreau),Carte(Valeur(2),Trefle));;
+let new4 = Turn(Carte(Valeur(14),Trefle),Carte(Valeur(14),Carreau),Carte(Valeur(2),Trefle),Carte(Valeur(3),Trefle));;
 
 
 let paquetCarteTest = cree_paquet_carte [];;
@@ -738,9 +739,12 @@ let paquetCarteTest = cree_paquet_carte [];;
   let paquetCarteSansD1etD2Test = supprimeCartesDonne new2 paquetCarteSansD1Test;;
   let paquetCarteSansD1etD2etTableTest = supprimeCartesTable new3 paquetCarteSansD1etD2Test;;
 let listrivertest1 = listRiverWithFlop new3 paquetCarteSansD1etD2etTableTest;;
-let listrivertest2 = listRiverWithFlop new3 paquetCarteSansD1etD2etTableTest;;
+let listrivertest2 = listRiverWithFlopOld new3 paquetCarteSansD1etD2etTableTest;;
+
+let listrivertest3 = listRiverWithTurn new4 paquetCarteSansD1etD2etTableTest;;
 let aaaaa = List.length listrivertest1;;
 let aaaaa2 = List.length listrivertest2;;
+let aaaaa3 = List.length listrivertest3;;
 
 (* let t = Sys.time();;
 proba_simple new1 new3;; *)
