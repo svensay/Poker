@@ -111,7 +111,7 @@ let rec read_tab () =
       |SYNTAXE_ERROR -> print_string("Mauvaise entrée pour la table, veuillez réssayer :"); read_tab ()
 ;;
 
-let affichage () = clear_graph();
+let affichage () =
   print_string("Veuillez entrée la 1er donne: ");
   let d1 = read_d1 () 
   in print_string("Veuillez entrée la 2eme donne: ");
@@ -150,6 +150,15 @@ let draw_all_card () =
 	in loop ()	
 ;;*)
 
-let rec loop() = loop();;
-affichage ();;
+let rec loop() =
+  affichage ();print_string("Voulez vous une autre configuration (y\\n) : ");
+  let rec answers () =
+    let repeat =  read_line ()
+    in match repeat with
+      |"y" -> clear_graph ();loop()
+      |"n" -> close_graph ()
+      | _ -> print_string("Mauvaise reponse réesayer (y\\n) : ");answers ()
+  in answers ()
+  
+;;
 loop ();;

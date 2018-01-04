@@ -738,7 +738,7 @@ let paquetCarteTest = cree_paquet_carte [];;
   let paquetCarteSansD1etD2Test = supprimeCartesDonne new2 paquetCarteSansD1Test;;
   let paquetCarteSansD1etD2etTableTest = supprimeCartesTable new3 paquetCarteSansD1etD2Test;;
 let listrivertest1 = listRiverWithFlop new3 paquetCarteSansD1etD2etTableTest;;
-let listrivertest2 = listRiverWithFlopOld new3 paquetCarteSansD1etD2etTableTest;;
+let listrivertest2 = listRiverWithFlop new3 paquetCarteSansD1etD2etTableTest;;
 let aaaaa = List.length listrivertest1;;
 let aaaaa2 = List.length listrivertest2;;
 
