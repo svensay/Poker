@@ -409,6 +409,23 @@ let listRiverWithFlop f paquet =
   in aux [] f paquet
 ;;
 
+
+(* Prend un Flop et crée une liste de toutes les River possibles *)
+let listRiverWithFlopNewMaisMemeComplexiteVoirPire f paquet =
+  let rec aux res f paquet = match paquet with
+    | [] -> res
+    | h::q -> match f with
+              | Flop(c1,c2,c3) -> let rec aux2 res2 paquet = match paquet with
+                                    | [] -> res2
+                                    | h2::q2 -> aux2 (River(c1,c2,c3,h,h2)::res2) q2
+                                  in aux ((aux2 [] q)@res) f q  
+
+              | _ -> failwith("Impossible")
+
+  in aux [] f paquet
+;;
+
+
 (* Prend un Flop ou un Turn et renvoit la liste de toutes les River possibles  *)
 let genereTable paquet table = match table with
     | Turn(_,_,_,_) -> listRiverWithTurn table paquet
@@ -448,6 +465,12 @@ let proba_double d1 d2 t =
     | Turn(_,_,_,_) | Flop(_,_,_) -> proba_with_compare_list d1 d2 (genereTable paquetCarteSansD1etD2etTable t)
 ;;
  
+let proba_double_pour_proba_simple d1 d2 t paquetCarteSansD1etD2etTable =
+  match t with
+    | River(_,_,_,_,_) -> proba_with_compare d1 d2 t
+    | _ -> failwith("Pas possible")
+    (* | Turn(_,_,_,_) | Flop(_,_,_) -> proba_with_compare_list d1 d2 paquetCarteSansD1etD2etTable *)
+;;
 
 let genererListeMainAux elt l =
   let rec aux res l = match l with
@@ -499,11 +522,14 @@ let teeeeest d1 t =
 let proba_simple_aux d1 d2 t =
   let rec aux j1 d1 d2 t = match t with
     | [] -> j1
-    | h::q -> let (x,_) = proba_double d1 d2 h in
+    | h::q -> let (x,_) = proba_double_pour_proba_simple d1 d2 h t in
+              (* aux (j1 +. x) d1 d2 q *)
               if x = 1. then aux (j1 +. x) d1 d2 q
               else aux j1 d1 d2 q
   in let resJ1 = aux 0. d1 d2 t in
   (resJ1 /. float_of_int (List.length t))
+  (* (resJ1 /. 52.) *)
+  (* resJ1 *)
 ;;
 
 let proba_simple d1 t = 
@@ -522,6 +548,7 @@ let proba_simple d1 t =
                 aux (aAjouterAuResultat +. res) q
   in let somme = aux 0. listeDonneD2Possible in
   (somme /. float_of_int (List.length listeDonneD2Possible))
+  (* somme *)
 ;;
 
 
@@ -633,7 +660,7 @@ let b = compare_hands main1 main2 table;;
 
 let c = compare_comb test1 test2;;  
 
-let a = proba_simple main1 table;;
+(* let a = proba_simple main1 table;; *)
 
 
 let paquetDeCartesCree = cree_paquet_carte [];;
@@ -694,3 +721,29 @@ let rec print_list = function
 ;;
 
 (* print_list bonjour3;; *)
+
+let new1 = Main(Carte(Valeur(3),Coeur),Carte(Valeur(2),Pique));;
+let new2 = Main(Carte(Valeur(2),Carreau),Carte(Valeur(4),Trefle));;
+let new3 = Flop(Carte(Valeur(14),Trefle),Carte(Valeur(14),Carreau),Carte(Valeur(2),Trefle));;
+
+
+let paquetCarteTest = cree_paquet_carte [];;
+  let paquetCarteSansD1Test = supprimeCartesDonne new1 paquetCarteTest;;
+  let paquetCarteSansD1etD2Test = supprimeCartesDonne new2 paquetCarteSansD1Test;;
+  let paquetCarteSansD1etD2etTableTest = supprimeCartesTable new3 paquetCarteSansD1etD2Test;;
+let listrivertest1 = listRiverWithFlop new3 paquetCarteSansD1etD2etTableTest;;
+let listrivertest2 = listRiverWithFlopOld new3 paquetCarteSansD1etD2etTableTest;;
+let aaaaa = List.length listrivertest1;;
+let aaaaa2 = List.length listrivertest2;;
+
+(* let t = Sys.time();;
+proba_simple new1 new3;; *)
+(*   let paquetCarte1 = cree_paquet_carte [] in
+  let paquetCarteSansD11 = supprimeCartesDonne new1 paquetCarte1 in
+  let paquetCarteSansD1EtTable1 = supprimeCartesTable new3 paquetCarteSansD11 in
+  genererListeMain paquetCarteSansD1EtTable1;;
+ *)
+(* Printf.printf "Execution time: %fs\n" (Sys.time() -. t);; *)
+(* print_endline "Execution time: \n";;
+print_int (Sys.time() -. t);;
+ *)
