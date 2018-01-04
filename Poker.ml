@@ -600,21 +600,27 @@ let char_to_color char = match char with
 ;;
 
 let make_card_with_string string =
-  let valeur = char_to_valeur (String.get string 0)
-  in let color = if valeur = 10 then match (String.get string 2) with
-    |'c' -> char_to_color (String.get string 3)
-    |_ -> char_to_color (String.get string 2)
-    else match (String.get string 1) with
-    |'c' -> char_to_color (String.get string 2)
-    |_ -> char_to_color (String.get string 1)
-     in Carte(Valeur(valeur),color)
+  try
+    let valeur = char_to_valeur (String.get string 0)
+    in let color = if valeur = 10 then match (String.get string 2) with
+      |'c' -> char_to_color (String.get string 3)
+      |_ -> char_to_color (String.get string 2)
+      else match (String.get string 1) with
+	|'c' -> char_to_color (String.get string 2)
+	|_ -> char_to_color (String.get string 1)
+       in Carte(Valeur(valeur),color)
+  with
+    |Invalid_argument "Mauvaise string" -> raise(SYNTAXE_ERROR)
 ;;
 
 let make_donne line =
-  let index_space = String.rindex line ' '
-  in let first_card = String.sub line 0 index_space
-  and second_card = String.sub line (index_space+1) ((String.length line)-(index_space+1))
-     in Main(make_card_with_string first_card,make_card_with_string second_card)
+  try
+    let index_space = String.rindex line ' '
+    in let first_card = String.sub line 0 index_space
+    and second_card = String.sub line (index_space+1) ((String.length line)-(index_space+1))
+       in Main(make_card_with_string first_card,make_card_with_string second_card)
+  with
+    |Not_found -> raise(SYNTAXE_ERROR)
 ;;
 
 let rec string_to_tabString string tab_String =

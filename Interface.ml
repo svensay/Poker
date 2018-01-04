@@ -88,34 +88,42 @@ let rec read_d1 () =
        let d1 = make_donne d1_string
        in draw_d1 d1; d1
     with
-      |SYNTAXE_ERROR -> print_endline("Mauvaise entrée pour la donne 1, veuillez réessayer :"); read_d1 ()
+      |SYNTAXE_ERROR -> print_string("Mauvaise entrée pour la donne 1, veuillez réessayer :"); read_d1 ()
 ;;
 
-let rec read_tab () =
+let rec read_d2 () =
+  let d2_string = read_line ()
+  in try
+       match d2_string with
+	 |"?" -> None
+	 |_ -> let d2 = make_donne d2_string
+	       in draw_d2 d2; Some d2
+    with
+      |SYNTAXE_ERROR -> print_string("Mauvaise entrée pour la donne 2, veuillez réessayer :"); read_d2 ()
+;;
+
+let rec read_tab () = 
   let t_string = read_line ()
   in try
        let t = make_table t_string
        in draw_table t;t
     with
-      |SYNTAXE_ERROR -> print_endline("Mauvaise entrée pour la table, veuillez réssayer :"); read_tab ()
+      |SYNTAXE_ERROR -> print_string("Mauvaise entrée pour la table, veuillez réssayer :"); read_tab ()
 ;;
 
 let affichage () = clear_graph();
-  let d1 = read_d1 ();
-  in let d2_string = read_line ()
-     in let t = read_tab ()
-	in let rec read_d2 () =
-	     try
-	       match d2_string with
-		 |"?" -> moveto 150 330;
-		   draw_string "?";
-		   draw_proba_simple d1 t
-		 |_ -> let d2 = make_donne d2_string
-		       in draw_d2 d2;
-		       draw_proba_double d1 d2 t
-	     with
-	       |SYNTAXE_ERROR -> print_endline("Mauvaise entrée pour la donne 2, veuillez réessayer :"); read_d2 ()
-	   in read_d2 ()  
+  print_string("Veuillez entrée la 1er donne: ");
+  let d1 = read_d1 () 
+  in print_string("Veuillez entrée la 2eme donne: ");
+  let d2_option = read_d2 ()
+  in print_string("Veuillez entrée la table: ");
+  let t = read_tab ()
+  in match d2_option with
+    |None -> moveto 150 330;
+      draw_string "?";
+      draw_proba_simple d1 t
+    |Some d2 -> draw_d2 d2;
+      draw_proba_double d1 d2 t  
 ;;
 
 (*let rec draw_line_card x y list_card list_coord_card =  match list_card with
@@ -142,4 +150,6 @@ let draw_all_card () =
 	in loop ()	
 ;;*)
 
+let rec loop() = loop();;
 affichage ();;
+loop ();;
