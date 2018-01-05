@@ -1,6 +1,6 @@
 all: compute interface
 
-#Edition des liens et création de l'éxécutable
+#Edition des liens et création des éxécutables
 compute: Poker.cmo Lecture.cmo
 	ocamlc -o compute Poker.cmo Lecture.cmo
 
@@ -21,4 +21,4 @@ Interface.cmo: Interface.ml
 
 #Effacer fichiers auxiliaires
 clean:
-	rm *.cmi *.cmo compute interfaceG
+	rm *.cmi *.cmo

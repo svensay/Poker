@@ -1,4 +1,4 @@
-open Poker
+open Poker;;
 
 let lecture_de_fichier file =
 	let reader = open_in file
@@ -23,4 +23,8 @@ let lecture_de_fichier file =
     with
       | End_of_file | SYNTAXE_ERROR -> failwith("Erreur de fichier")
 
-let () = lecture_de_fichier Sys.argv.(1);;
+let () = 
+let t = Sys.time() in
+let t2 = lecture_de_fichier Sys.argv.(1) in
+Printf.printf "Execution time: %fs\n" (Sys.time() -. t)
+;;
