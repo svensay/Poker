@@ -56,9 +56,18 @@ let draw_proba_double d1 d2 t = moveto 0 200;lineto w 200;
   in let proba_d = proba_double d1 d2 t
      in let true_time = (Sys.time() -. time)
 	in match proba_d with
-	  |(1.0,0.0) -> moveto 150 150;draw_string "Le joueur 1 est gagnant."
-	  |(0.0,1.0) -> moveto 150 150;draw_string "Le joueur 2 est gagnant."
-	  |(0.5,0.5) -> moveto 150 150;draw_string "Egalite"
+	  |(1.0,0.0) -> moveto 150 150;
+	    draw_string "Le joueur 1 est gagnant.";
+	    moveto 150 50;
+	    draw_string ("("^(string_of_float true_time)^"s)");
+	  |(0.0,1.0) -> moveto 150 150;
+	    draw_string "Le joueur 2 est gagnant.";
+	    moveto 150 50;
+	    draw_string ("("^(string_of_float true_time)^"s)");
+	  |(0.5,0.5) -> moveto 150 150;
+	    draw_string "Egalite";
+	    moveto 150 50;
+	    draw_string ("("^(string_of_float true_time)^"s)");
 	  |(p1,p2) ->moveto 150 150;
 	    draw_string "Joueur 1 :";
 	    moveto 250 150;

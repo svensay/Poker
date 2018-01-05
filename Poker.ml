@@ -527,3 +527,100 @@ let make_table string =
     |h1::h2::h3::h4::h5::[] -> River(make_card_with_string h1,make_card_with_string h2,make_card_with_string h3,make_card_with_string h4,make_card_with_string h5)
     |[]|_::[]|_::_::[]|_::_::_::_::_::_::_ ->raise(SYNTAXE_ERROR)
 ;;
+
+
+
+(*----------------------------ICI TESTE POUR BOUCLE ITERATION---------------------------*)
+type joueur = {
+  nom:string;
+  main_carte:donne;
+  mutable argent:int;(*Total de l'argent du joueur*)
+  mutable mise:int;(*Mise lors d'un tour*)
+}
+type mise_table = {
+  mutable pot:int;(*Represente le total des mises*)
+  mutable mise_actuelle:int;(*Mise lors d'un tour*)
+}
+
+type table_de_jeu = {
+  mutable milieu:table;(*Carte sur la table*)
+}
+
+let supprimeCartes c l = List.filter (fun carte -> (not (same_card c carte))) l ;;
+
+let randomCarte liste_carte =
+  let ind = (Random.int (List.length liste_carte))
+  in let rec aux i = match liste_carte with
+    |h::q -> if i = 0 then h
+      else aux (i-1)
+    |[] -> failwith("Impossible")
+     in aux ind    
+;;
+
+let make_joueur d =
+  let name = read_line()
+  in {nom=name;main_carte=d;argent=100;mise=0}
+;;
+
+let init_joueur() =
+  let paquet = cree_paquet_carte []
+  in let c1 = randomCarte paquet
+     in let paquetSansC1 = supprimeCartes c1 paquet
+	in let c2 = randomCarte paquetSansC1
+	   in let paquetSansC1EtC2 = supprimeCartes c2 paquetSansC1
+	      in print_string("Nom du 1er joueur: ");
+	      let j1 = make_joueur (Main(c1,c2))
+		 in let c3 = randomCarte paquetSansC1EtC2
+		    in let paquetSansC1EtC2EtC3 = supprimeCartes c3 paquetSansC1EtC2
+		       in let c4 = randomCarte paquetSansC1EtC2EtC3
+			  in let paquetSansC1EtC2EtC3etC4 = supprimeCartes c4 paquetSansC1EtC2EtC3
+			     in print_string("Nom du 2eme joueur: ");
+			     let j2 = make_joueur (Main(c3,c4))
+				in (j1,j2,paquetSansC1EtC2EtC3etC4)
+;;
+
+
+let mise_blind j1 j2 t =
+  j1.argent <- j1.argent - 5;
+  j1.mise <- j1.mise + 5;
+  j2.argent <- j2.argent - 10;
+  j2.mise <- j2.mise + 10;
+  t.mise_actuelle <- t.mise_actuelle + 15;
+;;
+
+let suivre j t =
+  j.argent <- j.argent - (t.mise_actuelle - j.mise);
+  t.mise_actuelle <- t.mise_actuelle + (t.mise_actuelle - j.mise);
+  j.mise <- t.mise_actuelle
+;;
+
+(*Pas fini*)
+let demande_que_faire j t = print_string(j.nom^", voulez-vous suivre(s), coucher(c) ou miser(m) : ");
+  let rec aux () = 
+    let ans = read_line()
+    in match ans with
+	|"s" -> suivre j t
+	|"c" -> ()
+	|"m" -> ()
+	|_ -> print_string("Mauvaise entrée. "^j.nom^", voulez-vous suivre(s), coucher(c) ou miser(m) : ");aux()
+  in aux()  
+;;
+
+
+  let blind j1 j2 t petite_blind = match petite_blind with
+    |true ->mise_blind j1 j2 t;
+    demande_que_faire j1 t
+    |false -> mise_blind j2 j1 t;
+    demande_que_faire j2 t
+;;
+
+
+let game () =
+  let init = init_joueur()
+  in let j1 = (match init with (h1,_,_) -> h1)
+     in let j2 = (match init with (_,h2,_) -> h2)
+	in let paquet_carte = (match init with (_,_,h3) -> h3)
+	   in let petite_blind = Random.bool ()
+	      in let table_play = {pot=0;mise_actuelle=0}
+		 in  blind j1 j2 table_play petite_blind;
+;;
