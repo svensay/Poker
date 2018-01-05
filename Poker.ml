@@ -274,10 +274,10 @@ let compute_comb d t =
   let lt = colorOrQuinteFlushAdd trefle 0 0 [] 12 []
   in let lca = colorOrQuinteFlushAdd carreau 0 0 [] 12 lt
      in let lco = colorOrQuinteFlushAdd coeur 0 0 [] 12 lca
-	in let lp = colorOrQuinteFlushAdd pique 0 0 [] 12 lco (*Ajoute Couleur ou QuinteFlush*)
-	   in let liste_rang = list_rank l
-	      in let final_list = list_comb 12 (carteHauteAdd liste_rang lp) 0 l liste_rang(*Ajoute CarteHaute*)
-		 in doubleAndFull final_list final_list liste_rang (*Ajoute DoublePaire ou Full*)
+  in let lp = colorOrQuinteFlushAdd pique 0 0 [] 12 lco (*Ajoute Couleur ou QuinteFlush*)
+     in let liste_rang = list_rank l
+        in let final_list = list_comb 12 (carteHauteAdd liste_rang lp) 0 l liste_rang(*Ajoute CarteHaute*)
+     in doubleAndFull final_list final_list liste_rang (*Ajoute DoublePaire ou Full*)
 ;;
 
 (* Renvoie la combinaison maximale de la liste l (on suppose qu'il y a au moins 1 élément dans la liste) *)
@@ -317,27 +317,28 @@ let same_card card1 card2 = match card1,card2 with
 let rec make_list_value i liste_de_rang  = if i < 0 then liste_de_rang else make_list_value (i-1) (Valeur(i+2)::liste_de_rang);;
    
 
-(*Ajoute a liste_des_cartes tous les cartes de couleur color*)
-(*valeur : Voir make_list_value*)
+(* Ajoute à liste_des_cartes toutes les cartes de couleur color
+ * valeur : Voir make_list_value
+ *)
 let rec make_card_with_one_color color valeur liste_des_cartes = match valeur with
   |[] -> liste_des_cartes
   |h::t -> make_card_with_one_color color t (Carte(h,color)::liste_des_cartes)
 ;;
 
-(*Initialise un paquet de carte (liste_des_cartes) avec le tableau de couleur avec le tableau de valeur*)
+(* Initialise un paquet de carte (liste_des_cartes) avec le tableau de couleur avec le tableau de valeur *)
 let rec init_paquet_carte valeur couleur liste_des_cartes = match couleur with
   |[] -> liste_des_cartes
   |h::t -> init_paquet_carte valeur t (make_card_with_one_color h valeur liste_des_cartes)
 ;;
   
-(*Creer un paquet de carte dans liste_des_cartes*)
+(* Crée un paquet de carte (liste de cartes)*)
 let cree_paquet_carte liste_des_cartes =
   let couleur = [Pique;Coeur;Carreau;Trefle]
   and valeur = make_list_value 12 []
   in init_paquet_carte valeur couleur liste_des_cartes
 ;;
 
-(*Ajoute un donne dans liste_donne_d2 avec comme 1er carte "card" et 2eme carte le reste des cartes dans list_card*)
+(* Ajoute une donne dans liste_donne_d2 avec comme 1ère carte "card" et 2ème carte chaque carte qui est dans list_card *)
 let rec add_donne card list_card liste_donne_d2 = match list_card with
   | [] -> liste_donne_d2
   | h::t -> add_donne card t (Main(card,h)::liste_donne_d2)
@@ -367,18 +368,6 @@ let listRiverWithTurn t paquet =
 ;;
 
 (* Prend un Flop et crée une liste de toutes les River possibles *)
-let listRiverWithFlopOld f paquet =
-  let rec aux res f paquet = match paquet with
-    | [] -> res
-    | h::q -> match f with
-              | Flop(c1,c2,c3) -> aux ((listRiverWithTurn (Turn(c1,c2,c3,h)) q)@res) f q 
-              | _ -> failwith("Impossible")
-
-  in aux [] f paquet
-;;
-
-
-(* Prend un Flop et crée une liste de toutes les River possibles *)
 let listRiverWithFlop f paquet =
   let rec aux res f paquet = match paquet with
     | [] -> res
@@ -393,14 +382,14 @@ let listRiverWithFlop f paquet =
   in aux [] f paquet
 ;;
 
-
-(* Prend un Flop ou un Turn et renvoit la liste de toutes les River possibles  *)
+(* Prend un Flop ou un Turn et renvoit la liste de toutes les River possibles *)
 let genereTable paquet table = match table with
     | Turn(_,_,_,_) -> listRiverWithTurn table paquet
     | Flop(_,_,_) -> listRiverWithFlop table paquet
     | _ -> failwith("Impossible")
 ;;
 
+(* Renvoie la probabilité de victoire pour les deux joueurs (utilisé par proba_double) *)
 let proba_with_compare d1 d2 t =
   let probaJ1 = compare_hands d1 d2 t in
   match probaJ1 with
@@ -420,6 +409,10 @@ let proba_with_compare_list d1 d2 liste_river =
   ((resJ1 /. float_of_int (List.length liste_river)),(resJ2 /. float_of_int (List.length liste_river)))
 ;;
 
+(* Renvoie un couple de nombres réels compris entre 0 et 1 indiquant les
+ * probabilités de victoire de deux joueurs en fonction de leurs donnes d1 et d2 
+ * et des cartes présentes sur la table t
+ *)
 let proba_double d1 d2 t =
   let paquetCarte = cree_paquet_carte [] in
   let paquetCarteSansD1 = supprimeCartesDonne d1 paquetCarte in
@@ -430,13 +423,14 @@ let proba_double d1 d2 t =
     | Turn(_,_,_,_) | Flop(_,_,_) -> proba_with_compare_list d1 d2 (genereTable paquetCarteSansD1etD2etTable t)
 ;;
  
-(* pour éviter de recréer le paquet de cartes *)
+(* Pour éviter de recréer le paquet de cartes *)
 let proba_double_pour_proba_simple d1 d2 t paquetCarteSansD1etD2etTable =
   match t with
     | River(_,_,_,_,_) -> proba_with_compare d1 d2 t
     | _ -> failwith("Pas possible")
 ;;
 
+(* Méthode auxiliaire utilisée dans genererListeMain *)
 let genererListeMainAux elt l =
   let rec aux res l = match l with
     | [] -> res
@@ -444,8 +438,7 @@ let genererListeMainAux elt l =
   in aux [] l 
 ;;
 
-
-(*  creer une liste de donne possible à partir d'une liste l de carte*)
+(*  Crée une liste de donnes possibles à partir d'une liste l de cartes *)
 let genererListeMain l = 
   let rec aux res l = match l with
     | [] -> res
@@ -453,6 +446,7 @@ let genererListeMain l =
   in aux [] l
 ;;
  
+(* Méthode auxiliaire utilisée dans proba_simple *)
 let proba_simple_aux d1 d2 t =
   let rec aux j1 d1 d2 t = match t with
     | [] -> j1
@@ -463,6 +457,7 @@ let proba_simple_aux d1 d2 t =
   (resJ1 /. float_of_int (List.length t))
 ;;
 
+(* Renvoie la probabilité de victoire d’un joueur sans que soit connue la donne de son adversaire *)
 let proba_simple d1 t = 
   let paquetCarte = cree_paquet_carte [] in
   let paquetCarteSansD1 = supprimeCartesDonne d1 paquetCarte in
@@ -481,8 +476,12 @@ let proba_simple d1 t =
   (somme /. float_of_int (List.length listeDonneD2Possible))
 ;;
 
+(* Exception pour gérer les erreurs de syntaxe lors de la lecture d'un fichier de test ou d'une 
+ * entrée de l'utilisateur lors de l'utilisation de l'interface 
+ *)
 exception SYNTAXE_ERROR;;
 
+(* Renvoie la valeur du rang à partir d'un caractère *)
 let char_to_valeur char = match char with
   |'A' -> 14
   |'R' -> 13
@@ -500,6 +499,7 @@ let char_to_valeur char = match char with
   |_ -> raise(SYNTAXE_ERROR)
 ;;
 
+(* Renvoie la valeur de la couleur à partir d'un caractère  *)
 let char_to_color char = match char with
   |'p' -> Pique
   |'o' -> Coeur
@@ -508,6 +508,7 @@ let char_to_color char = match char with
   |_ -> raise(SYNTAXE_ERROR)
 ;;
 
+(* Crée une carte à partir d'une chaîne de caractères *)
 let make_card_with_string string =
   try
     let valeur = char_to_valeur (String.get string 0)
@@ -522,6 +523,7 @@ let make_card_with_string string =
     |Invalid_argument _ -> raise(SYNTAXE_ERROR)
 ;;
 
+(* Crée une donne à partir d'une chaîne de caractères *)
 let make_donne line =
   try
     let index_space = String.rindex line ' '
@@ -532,6 +534,7 @@ let make_donne line =
     |Not_found -> raise(SYNTAXE_ERROR)
 ;;
 
+(* Renvoie une liste de chaînes de caractères à partir d'une chaîne de caractères (split) *)
 let rec string_to_tabString string tab_String =
   try
     let index_space = String.rindex string ' '
@@ -541,6 +544,7 @@ let rec string_to_tabString string tab_String =
   
 ;;
 
+(* Crée une table à partir d'une chaîne de caractère *)
 let make_table string =
   let tab_table = string_to_tabString string []
   in match tab_table with
@@ -548,101 +552,4 @@ let make_table string =
     |h1::h2::h3::h4::[] -> Turn(make_card_with_string h1,make_card_with_string h2,make_card_with_string h3,make_card_with_string h4)
     |h1::h2::h3::h4::h5::[] -> River(make_card_with_string h1,make_card_with_string h2,make_card_with_string h3,make_card_with_string h4,make_card_with_string h5)
     |[]|_::[]|_::_::[]|_::_::_::_::_::_::_ ->raise(SYNTAXE_ERROR)
-;;
-
-
-
-(*----------------------------ICI TESTE POUR BOUCLE ITERATION---------------------------*)
-type joueur = {
-  nom:string;
-  main_carte:donne;
-  mutable argent:int;(*Total de l'argent du joueur*)
-  mutable mise:int;(*Mise lors d'un tour*)
-}
-type mise_table = {
-  mutable pot:int;(*Represente le total des mises*)
-  mutable mise_actuelle:int;(*Mise lors d'un tour*)
-}
-
-type table_de_jeu = {
-  mutable milieu:table;(*Carte sur la table*)
-}
-
-let supprimeCartes c l = List.filter (fun carte -> (not (same_card c carte))) l ;;
-
-let randomCarte liste_carte =
-  let ind = (Random.int (List.length liste_carte))
-  in let rec aux i = match liste_carte with
-    |h::q -> if i = 0 then h
-      else aux (i-1)
-    |[] -> failwith("Impossible")
-     in aux ind    
-;;
-
-let make_joueur d =
-  let name = read_line()
-  in {nom=name;main_carte=d;argent=100;mise=0}
-;;
-
-let init_joueur() =
-  let paquet = cree_paquet_carte []
-  in let c1 = randomCarte paquet
-     in let paquetSansC1 = supprimeCartes c1 paquet
-	in let c2 = randomCarte paquetSansC1
-	   in let paquetSansC1EtC2 = supprimeCartes c2 paquetSansC1
-	      in print_string("Nom du 1er joueur: ");
-	      let j1 = make_joueur (Main(c1,c2))
-		 in let c3 = randomCarte paquetSansC1EtC2
-		    in let paquetSansC1EtC2EtC3 = supprimeCartes c3 paquetSansC1EtC2
-		       in let c4 = randomCarte paquetSansC1EtC2EtC3
-			  in let paquetSansC1EtC2EtC3etC4 = supprimeCartes c4 paquetSansC1EtC2EtC3
-			     in print_string("Nom du 2eme joueur: ");
-			     let j2 = make_joueur (Main(c3,c4))
-				in (j1,j2,paquetSansC1EtC2EtC3etC4)
-;;
-
-
-let mise_blind j1 j2 t =
-  j1.argent <- j1.argent - 5;
-  j1.mise <- j1.mise + 5;
-  j2.argent <- j2.argent - 10;
-  j2.mise <- j2.mise + 10;
-  t.mise_actuelle <- t.mise_actuelle + 15;
-;;
-
-let suivre j t =
-  j.argent <- j.argent - (t.mise_actuelle - j.mise);
-  t.mise_actuelle <- t.mise_actuelle + (t.mise_actuelle - j.mise);
-  j.mise <- t.mise_actuelle
-;;
-
-(*Pas fini*)
-let demande_que_faire j t = print_string(j.nom^", voulez-vous suivre(s), coucher(c) ou miser(m) : ");
-  let rec aux () = 
-    let ans = read_line()
-    in match ans with
-	|"s" -> suivre j t
-	|"c" -> ()
-	|"m" -> ()
-	|_ -> print_string("Mauvaise entr�e. "^j.nom^", voulez-vous suivre(s), coucher(c) ou miser(m) : ");aux()
-  in aux()  
-;;
-
-
-  let blind j1 j2 t petite_blind = match petite_blind with
-    |true ->mise_blind j1 j2 t;
-    demande_que_faire j1 t
-    |false -> mise_blind j2 j1 t;
-    demande_que_faire j2 t
-;;
-
-
-let game () =
-  let init = init_joueur()
-  in let j1 = (match init with (h1,_,_) -> h1)
-     in let j2 = (match init with (_,h2,_) -> h2)
-	in let paquet_carte = (match init with (_,_,h3) -> h3)
-	   in let petite_blind = Random.bool ()
-	      in let table_play = {pot=0;mise_actuelle=0}
-		 in  blind j1 j2 table_play petite_blind;
 ;;
