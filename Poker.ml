@@ -59,18 +59,6 @@ let compare_comb_equals c1 c2 = match c1, c2 with
   | _ , _  -> failwith("Pas possible")
 ;;
 
-(* let valeur_comb c = match c with
-  | QuinteFlush r -> print_endline("QuinteFlush"); 9
-  | Carre (r1,r2) -> print_endline("Carre"); 8
-  | Full  (r1,r2) ->  print_endline("Full"); 7
-  | Couleur (r1,r2,r3,r4,r5) -> print_endline("Couleur"); 6
-  | Suite r -> print_endline("Suite"); 5
-  | Brelan (r1,r2,r3) ->  print_endline("Brelan"); 4
-  | DoublePaire (r1,r2,r3) ->  print_endline("DoublePaire"); 3
-  | Paire (r1,r2,r3,r4) -> print_endline("Paire"); 2
-  | CarteHaute (r1,r2,r3,r4,r5) -> print_endline("CarteHaute"); 1
-;; *)
-
 let valeur_comb c = match c with
   | QuinteFlush r -> 9
   | Carre (r1,r2) -> 8
@@ -82,8 +70,6 @@ let valeur_comb c = match c with
   | Paire (r1,r2,r3,r4) -> 2
   | CarteHaute (r1,r2,r3,r4,r5) -> 1
 ;;
-
-
 
 let print_rang (r:rang) = match r with
   Valeur i -> print_newline (); print_int(i); print_newline ();
@@ -105,29 +91,22 @@ let print_comb c =
 ;;
 
 let compare_comb c1 c2 =
-(*         print_endline("c1");
-        print_comb c1; 
-        print_endline("c2");
-        print_comb c2;
- *)        
         if valeur_comb c1 > valeur_comb c2 then 1
         else if valeur_comb c2 > valeur_comb c1 then -1
         else compare_comb_equals c1 c2
 ;;
 
 (*Donne la valeur du rang rank*)
-let rankToValue rank =
-  match rank with Valeur value -> value
+let rankToValue rank = match rank with 
+  Valeur value -> value
 ;;
 
 (*Renvoie la liste de carte de la donne d et de la table t*)
-let list_card d t =
-        let l = [] in
-        match d with
-        | Main (c1,c2) -> match t with
-          | Flop (c3,c4,c5) -> (c1::(c2::(c3::(c4::(c5::l)))))
-          | Turn (c3,c4,c5,c6) -> (c1::(c2::(c3::(c4::(c5::(c6::l))))))
-          | River (c3,c4,c5,c6,c7) -> (c1::(c2::(c3::(c4::(c5::(c6::(c7::l)))))))
+let list_card d t = match d with
+    | Main (c1,c2) -> match t with
+        | Flop (c3,c4,c5) -> c1::c2::c3::c4::c5::[]
+        | Turn (c3,c4,c5,c6) -> c1::c2::c3::c4::c5::c6::[]
+        | River (c3,c4,c5,c6,c7) -> c1::c2::c3::c4::c5::c6::c7::[]
 ;;
 
 (*retourne la liste des rank*)
@@ -141,7 +120,7 @@ let list_rank tab_rang =
       | 2 -> aux (i+1) (Valeur(i+2)::(Valeur(i+2)::l))
       | 3 -> aux (i+1) (Valeur(i+2)::(Valeur(i+2)::(Valeur(i+2)::l)))
       | 4 -> aux (i+1) (Valeur(i+2)::(Valeur(i+2)::(Valeur(i+2)::(Valeur(i+2)::l))))
-      |_ -> failwith("Mauvaise utilistation de la fonction list_rank")
+      |_ -> failwith("Mauvaise utilisation de la fonction list_rank")
   in aux 0 []
 ;;
 
@@ -152,7 +131,7 @@ let rec carreAdd list_rank i l =
   let list_rank_sans_i = (List.filter (fun x -> i != rankToValue x) list_rank)
   in match list_rank_sans_i with
     |h::t -> Carre(Valeur(i),h)::l
-    |[] -> failwith("Mauvaise utilistation de la fonction carreAdd")
+    |[] -> failwith("Mauvaise utilisation de la fonction carreAdd")
 ;;
 
 (*Ajoute la combinaison Brelan dans l*)
@@ -162,7 +141,7 @@ let rec brelanAdd list_rank i l =
   let list_rank_sans_i = (List.filter (fun x -> i != rankToValue x) list_rank)
   in match list_rank_sans_i with
     |h1::h2::t -> Brelan(Valeur(i),h1,h2)::l
-    |[]|_::[] -> failwith("Mauvaise utilistation de la fonction brelanAdd")
+    |[]|_::[] -> failwith("Mauvaise utilisation de la fonction brelanAdd")
 ;;
 
 (*Ajoute la combinaison Paire dans l*)
@@ -172,7 +151,7 @@ let rec pairAdd list_rank i l =
   let list_rank_sans_i = (List.filter (fun x -> i != rankToValue x) list_rank)
   in match list_rank_sans_i with
     |h1::h2::h3::_ -> Paire(Valeur(i),h1,h2,h3)::l
-    |[] |_::[] |_::_::[] -> failwith("Mauvaise utilistation de la fonction pairAdd")
+    |[] |_::[] |_::_::[] -> failwith("Mauvaise utilisation de la fonction pairAdd")
 ;;
 
 (*Créer une combinaison Couleur avec les valeurs de list_i(Voir colorAdd)*)
@@ -204,7 +183,7 @@ let rec doublePairAdd list_rank rang1 rang2 l =
   in match list_rank_sans with
     |h::_ when (rankToValue rang1) >  (rankToValue rang2)  -> DoublePaire(rang1,rang2,h)::l
     |h::_ when (rankToValue rang1) <  (rankToValue rang2)  -> DoublePaire(rang2,rang1,h)::l
-    |[]|_::_-> failwith("Mauvaise utilistation de la fonction doublePairAdd")
+    |[]|_::_-> failwith("Mauvaise utilisation de la fonction doublePairAdd")
 ;;
 
 (*si combinaison = Paire alors ajoute DoublePaire a list_comb*)
@@ -213,7 +192,7 @@ let rec doublePairAdd list_rank rang1 rang2 l =
 let findPaire combinaison list_rank list_comb r1 = match combinaison with
   | Paire (k1,k2,k3,k4) -> doublePairAdd list_rank r1 k1 list_comb
   | Brelan (k1,k2,k3) -> Full(k1,r1)::list_comb
-  | _ -> failwith("Mauvaise utilistation de la fonction findPaire")
+  | _ -> failwith("Mauvaise utilisation de la fonction findPaire")
 ;;
 
 (*si combinaison = Paire alors ajoute Full a list_comb*)
@@ -221,7 +200,7 @@ let findPaire combinaison list_rank list_comb r1 = match combinaison with
 let findBrelan combinaison list_comb r1 =  match combinaison with
   | Paire (k1,k2,k3,k4) -> Full(r1,k1)::list_comb
   | Brelan (k1,_,_) -> Full(k1,r1)::list_comb
-  |_ -> failwith("Mauvaise utilistation de la fonction findBrelan")
+  |_ -> failwith("Mauvaise utilisation de la fonction findBrelan")
 ;;
 
 (*Si on trouve un Brelan ou une Paire dans list_comb_tmp, ajoute une DoublePaire ou un Full dans list_comb*)
@@ -252,13 +231,13 @@ let rec count card l coeur pique trefle carreau =
   match card with
     | [] -> ()
     | h::tl -> match h with
-	| Carte ((rank:rang),color) -> match rank with
-	    | Valeur v -> l.(v-2) <- l.(v-2)+1;
-	      match color with
-		| Pique -> pique.(v-2) <- true;count tl l coeur pique trefle carreau
-		| Coeur -> coeur.(v-2) <- true;count tl l coeur pique trefle carreau
-		| Carreau -> carreau.(v-2) <- true;count tl l coeur pique trefle carreau
-		| Trefle -> trefle.(v-2) <- true;count tl l coeur pique trefle carreau
+  | Carte ((rank:rang),color) -> match rank with
+      | Valeur v -> l.(v-2) <- l.(v-2)+1;
+        match color with
+    | Pique -> pique.(v-2) <- true;count tl l coeur pique trefle carreau
+    | Coeur -> coeur.(v-2) <- true;count tl l coeur pique trefle carreau
+    | Carreau -> carreau.(v-2) <- true;count tl l coeur pique trefle carreau
+    | Trefle -> trefle.(v-2) <- true;count tl l coeur pique trefle carreau
 ;;
 
 (*Ajoute Paire, Brelan, Carre et Suite a lc*)
@@ -273,7 +252,7 @@ let rec list_comb i lc suite l liste_rang =(*Ajoute les Paire, Brelan et Carre*)
     | 2 -> list_comb (i-1) (pairAdd liste_rang (i+2) lc) (suite+1) l liste_rang
     | 3 -> list_comb (i-1) (brelanAdd liste_rang (i+2) lc) (suite+1) l liste_rang
     | 4 -> list_comb (i-1) (carreAdd liste_rang (i+2) lc) (suite+1) l liste_rang
-    | _ -> failwith("Mauvaise utilistation de la fonction list_comb")
+    | _ -> failwith("Mauvaise utilisation de la fonction list_comb")
 ;;
 
 (*Ajoute CarteHaute a lc*)
@@ -294,8 +273,8 @@ let compute_comb d t =
   let lc = colorOrQuinteFlushAdd trefle 0 0 [] 12 (colorOrQuinteFlushAdd carreau 0 0 [] 12 (colorOrQuinteFlushAdd coeur 0 0 [] 12 (colorOrQuinteFlushAdd pique 0 0 [] 12 [])))(*Ajoute Couleur ou QuinteFlush*)
   in let liste_rang = list_rank l
      in let final_list = list_comb 12 (carteHauteAdd liste_rang lc) 0 l liste_rang(*Ajoute CarteHaute*)
-	in doubleAndFull final_list final_list liste_rang (*Ajoute DoublePaire ou Full*)
-	
+  in doubleAndFull final_list final_list liste_rang (*Ajoute DoublePaire ou Full*)
+  
 ;;
 
 (* retourne la combinaison maximale de la liste (on suppose qu'il y a au moins 1 élément dans la liste) *)
@@ -313,25 +292,6 @@ let compare_hands d1 d2 t =
   (* print_comb (combMax l1); print_comb (combMax l2); *)
   compare_comb (combMax l1) (combMax l2) 
 ;;
-
-
-
-(* (*Initialise l,coeur,pique,trefle et carreau avec card*)
-let count2 card l coeur pique trefle carreau = match card with
-  | [] -> ()
-  | h::tl -> match h with
-    | Carte ((rank:rang),color) -> match rank with
-      | Valeur v -> l.(v-2) <- l.(v-2)+1;
-          match color with
-    | Pique -> pique.(v-2) <- true;count tl l coeur pique trefle carreau
-    | Coeur -> coeur.(v-2) <- true;count tl l coeur pique trefle carreau
-    | Carreau -> carreau.(v-2) <- true;count tl l coeur pique trefle carreau
-    | Trefle -> trefle.(v-2) <- true;count tl l coeur pique trefle carreau
-;;
-
-
-
-let compute_comb_max d t *)
 
 (*True si c1 = c2 sinon false. Ici c1 et c2 sont des Couleur*) 
 let same_color c1 c2 = match c1,c2 with
@@ -487,37 +447,6 @@ let genererListeMain l =
     | h::t -> aux ((genererListeMainAux h t)@res) t
   in aux [] l
 ;;
-
-(* let rec estDejaPresent elt l = match elt, l with
-  | Main(_,_), [] -> false
-  | Main(c1, c2), h::t -> match h with
-                          | Main(c3, c4) -> if ((same_card c1 c3 && same_card c2 c4) || (same_card c1 c4 && same_card c2 c3)) then true
-                                            else estDejaPresent elt t 
-;; *)
-
-(* let removeDoublon l = 
-  let rec aux res l = match l with
-    | [] -> res
-    | h::t -> if (estDejaPresent h t) then aux res t
-              else aux (h::res) t
-  in aux [] l
-;;       
-
-let teeeeest d1 t =
-  let paquetCarte = cree_paquet_carte [] in
-  let paquetCarteSansD1 = supprimeCartesDonne d1 paquetCarte in
-  supprimeCartesTable t paquetCarteSansD1
-;; *)
-
-
-(* let proba_with_compare_list d1 d2 liste_river =
-  let rec aux j1 j2 d1 d2 liste_river = match liste_river with
-    | [] -> (j1,j2)
-    | h::t -> let (x, y) = proba_with_compare d1 d2 h in
-              aux (j1 +. x) (j2 +. y) d1 d2 t
-  in let (resJ1, resJ2) = aux 0. 0. d1 d2 liste_river in
-  ((resJ1 /. float_of_int (List.length liste_river)),(resJ2 /. float_of_int (List.length liste_river)))
- *)
  
 let proba_simple_aux d1 d2 t =
   let rec aux j1 d1 d2 t = match t with
@@ -550,27 +479,6 @@ let proba_simple d1 t =
   (somme /. float_of_int (List.length listeDonneD2Possible))
   (* somme *)
 ;;
-
-
-(* let proba_simple d1 t =
-  let liste_carte_pour_d2 = match d1,t with(*Supprime les cartes de d1 et t dans liste_carte_pour_d2*)
-  |Main(c1,c2),Flop(c3,c4,c5) -> List.filter (fun carte_tab -> not((same_card c1 carte_tab) || (same_card c2 carte_tab) || (same_card c3 carte_tab) || (same_card c4 carte_tab) || (same_card c5 carte_tab))) (cree_paquet_carte [])
-  |Main(c1,c2),Turn(c3,c4,c5,c6) -> List.filter (fun carte_tab -> not((same_card c1 carte_tab) || (same_card c2 carte_tab) || (same_card c3 carte_tab) || (same_card c4 carte_tab) || (same_card c5 carte_tab) || (same_card c6 carte_tab))) (cree_paquet_carte [])
-  |Main(c1,c2),River(c3,c4,c5,c6,c7) ->List.filter (fun carte_tab -> not((same_card c1 carte_tab) || (same_card c2 carte_tab) || (same_card c3 carte_tab) || (same_card c4 carte_tab) || (same_card c5 carte_tab) || (same_card c6 carte_tab)  || (same_card c7 carte_tab))) (cree_paquet_carte [])
-  in let rec toute_donne_d2 liste_carte_pour_d2 liste_donne_d2 = match liste_carte_pour_d2 with(*Creer une liste de toutes les donnes possible pour d2*)
-       |[] -> liste_donne_d2
-       |h::q -> toute_donne_d2 q (add_donne h q liste_donne_d2)
-     in let donne_d2 = toute_donne_d2 liste_carte_pour_d2 []
-        in let rec tableau_proba donne_d2 tab_prob_d1_win = match donne_d2 with (*Creer la liste des probabilités de victoire de d1 avec toute les donne possibles de d2*)
-	  |[] -> tab_prob_d1_win
-	  |h::q -> tableau_proba q (fst(proba_double d1 h t)::tab_prob_d1_win)
-	   in let tab_prob_d1_win = tableau_proba donne_d2 []
-	      in let rec proba_win_d1 tab_prob_d1_win accumulateur = match tab_prob_d1_win with
-		|[] -> accumulateur
-		|h::q -> proba_win_d1 q (accumulateur+.h)
-		 in let proba_d1_sans_div = proba_win_d1 tab_prob_d1_win 0.0
-		    in proba_d1_sans_div/.float_of_int (List.length tab_prob_d1_win)
-;; *)
 
 exception SYNTAXE_ERROR;;
 
@@ -606,8 +514,8 @@ let make_card_with_string string =
       |'c' -> char_to_color (String.get string 3)
       |_ -> char_to_color (String.get string 2)
       else match (String.get string 1) with
-	|'c' -> char_to_color (String.get string 2)
-	|_ -> char_to_color (String.get string 1)
+  |'c' -> char_to_color (String.get string 2)
+  |_ -> char_to_color (String.get string 1)
        in Carte(Valeur(valeur),color)
   with
     |Invalid_argument "Mauvaise string" -> raise(SYNTAXE_ERROR)
@@ -640,6 +548,33 @@ let make_table string =
     |h1::h2::h3::h4::h5::[] -> River(make_card_with_string h1,make_card_with_string h2,make_card_with_string h3,make_card_with_string h4,make_card_with_string h5)
     |[]|_::[]|_::_::[]|_::_::_::_::_::_::_ ->raise(SYNTAXE_ERROR)
 ;;
+
+
+let colorToString c = match c with
+  | Pique -> "Pique"
+  | Coeur -> "Coeur"
+  | Carreau -> "Carreau"
+  | Trefle -> "Trefle"
+;;
+
+
+let print_card c = match c with
+  | Carte (r1, c1) -> print_rang r1; print_newline (); print_endline (colorToString c1); print_newline ();
+;;
+
+let print_main m = match m with
+  | Main (c1,c2) -> print_card c1; print_card c2; 
+;;
+
+let rec print_list = function 
+[] -> ()
+| e::l -> print_main e; print_list l
+;;
+
+(* print_list bonjour3;; *)
+
+
+(* TESTS *)
 
 let test1 = Suite(Valeur(7));;
 let test2 = Suite(Valeur(8));;
@@ -705,28 +640,6 @@ let bonjour3 = teeeeest main1 table;;
 let bonjour4 = List.length bonjour3;;
  *)
 
-let colorToString c = match c with
-  | Pique -> "Pique"
-  | Coeur -> "Coeur"
-  | Carreau -> "Carreau"
-  | Trefle -> "Trefle"
-;;
-
-
-let print_card c = match c with
-  | Carte (r1, c1) -> print_rang r1; print_newline (); print_endline (colorToString c1); print_newline ();
-;;
-
-let print_main m = match m with
-  | Main (c1,c2) -> print_card c1; print_card c2; 
-;;
-
-let rec print_list = function 
-[] -> ()
-| e::l -> print_main e; print_list l
-;;
-
-(* print_list bonjour3;; *)
 
 let new1 = Main(Carte(Valeur(3),Coeur),Carte(Valeur(2),Pique));;
 let new2 = Main(Carte(Valeur(2),Carreau),Carte(Valeur(4),Trefle));;
@@ -745,15 +658,3 @@ let listrivertest3 = listRiverWithTurn new4 paquetCarteSansD1etD2etTableTest;;
 let aaaaa = List.length listrivertest1;;
 let aaaaa2 = List.length listrivertest2;;
 let aaaaa3 = List.length listrivertest3;;
-
-(* let t = Sys.time();;
-proba_simple new1 new3;; *)
-(*   let paquetCarte1 = cree_paquet_carte [] in
-  let paquetCarteSansD11 = supprimeCartesDonne new1 paquetCarte1 in
-  let paquetCarteSansD1EtTable1 = supprimeCartesTable new3 paquetCarteSansD11 in
-  genererListeMain paquetCarteSansD1EtTable1;;
- *)
-(* Printf.printf "Execution time: %fs\n" (Sys.time() -. t);; *)
-(* print_endline "Execution time: \n";;
-print_int (Sys.time() -. t);;
- *)

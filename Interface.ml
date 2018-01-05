@@ -63,7 +63,7 @@ let draw_proba_double d1 d2 t = moveto 0 200;lineto w 200;
   in match proba_d with
     |(1.0,0.0) -> moveto 150 150;draw_string "Le joueur 1 est gagnant."
     |(0.0,1.0) -> moveto 150 150;draw_string "Le joueur 2 est gagnant."
-    |(0.5,0.5) -> moveto 150 150;draw_string "Egalité."
+    |(0.5,0.5) -> moveto 150 150;draw_string "Egalit?"
     |(p1,p2) ->moveto 150 150;
       draw_string "Joueur 1 : !!";
       moveto 200 150;
@@ -75,7 +75,7 @@ let draw_proba_double d1 d2 t = moveto 0 200;lineto w 200;
 ;;
 
 let draw_proba_simple d1 t = moveto 0 200;lineto w 200;
-  let prob_simp = proba_simple d1 table
+  let prob_simp = proba_simple d1 t
   in moveto 150 150;
       draw_string "Joueur 1 : ";
       moveto 200 150;
@@ -88,7 +88,7 @@ let rec read_d1 () =
        let d1 = make_donne d1_string
        in draw_d1 d1; d1
     with
-      |SYNTAXE_ERROR -> print_string("Mauvaise entrée pour la donne 1, veuillez réessayer :"); read_d1 ()
+      |SYNTAXE_ERROR -> print_string("Mauvaise entr? pour la donne 1, veuillez r?ssayer :"); read_d1 ()
 ;;
 
 let rec read_d2 () =
@@ -99,7 +99,7 @@ let rec read_d2 () =
 	 |_ -> let d2 = make_donne d2_string
 	       in draw_d2 d2; Some d2
     with
-      |SYNTAXE_ERROR -> print_string("Mauvaise entrée pour la donne 2, veuillez réessayer :"); read_d2 ()
+      |SYNTAXE_ERROR -> print_string("Mauvaise entr? pour la donne 2, veuillez r?ssayer :"); read_d2 ()
 ;;
 
 let rec read_tab () = 
@@ -108,15 +108,15 @@ let rec read_tab () =
        let t = make_table t_string
        in draw_table t;t
     with
-      |SYNTAXE_ERROR -> print_string("Mauvaise entrée pour la table, veuillez réssayer :"); read_tab ()
+      |SYNTAXE_ERROR -> print_string("Mauvaise entr? pour la table, veuillez r?sayer :"); read_tab ()
 ;;
 
 let affichage () =
-  print_string("Veuillez entrée la 1er donne: ");
+  print_string("Veuillez entr? la 1er donne: ");
   let d1 = read_d1 () 
-  in print_string("Veuillez entrée la 2eme donne: ");
+  in print_string("Veuillez entr? la 2eme donne: ");
   let d2_option = read_d2 ()
-  in print_string("Veuillez entrée la table: ");
+  in print_string("Veuillez entr? la table: ");
   let t = read_tab ()
   in match d2_option with
     |None -> moveto 150 330;
@@ -157,7 +157,7 @@ let rec loop() =
     in match repeat with
       |"y" -> clear_graph ();loop()
       |"n" -> close_graph ()
-      | _ -> print_string("Mauvaise reponse réesayer (y\\n) : ");answers ()
+      | _ -> print_string("Mauvaise reponse r?sayer (y\\n) : ");answers ()
   in answers ()
   
 ;;
