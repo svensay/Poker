@@ -21,4 +21,4 @@ Interface.cmo: Interface.ml
 
 #Effacer fichiers auxiliaires
 clean:
-	rm *.cmi *.cmo
+	rm *.cmi *.cmo compute interfaceG

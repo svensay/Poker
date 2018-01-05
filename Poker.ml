@@ -274,7 +274,8 @@ let rec list_comb i lc suite l liste_rang =(*Ajoute les Paire, Brelan et Carre*)
     | 3 -> list_comb (i-1) (brelanAdd liste_rang (i+2) lc) (suite+1) l liste_rang
     | 4 -> list_comb (i-1) (carreAdd liste_rang (i+2) lc) (suite+1) l liste_rang
     | _ -> failwith("Mauvaise utilistation de la fonction list_comb")
-;;
+  ;;
+
 
 (*Ajoute CarteHaute a lc*)
 let carteHauteAdd liste_rang lc = match liste_rang with
@@ -291,11 +292,13 @@ let compute_comb d t =
   and carreau = Array.make 13 false
   and card = list_card d t
   in count card l coeur pique trefle carreau;
-  let lc = colorOrQuinteFlushAdd trefle 0 0 [] 12 (colorOrQuinteFlushAdd carreau 0 0 [] 12 (colorOrQuinteFlushAdd coeur 0 0 [] 12 (colorOrQuinteFlushAdd pique 0 0 [] 12 [])))(*Ajoute Couleur ou QuinteFlush*)
-  in let liste_rang = list_rank l
-     in let final_list = list_comb 12 (carteHauteAdd liste_rang lc) 0 l liste_rang(*Ajoute CarteHaute*)
-  in doubleAndFull final_list final_list liste_rang (*Ajoute DoublePaire ou Full*)
-  
+  let lt = colorOrQuinteFlushAdd trefle 0 0 [] 12 []
+  in let lca = colorOrQuinteFlushAdd carreau 0 0 [] 12 lt
+     in let lco = colorOrQuinteFlushAdd coeur 0 0 [] 12 lca
+	in let lp = colorOrQuinteFlushAdd pique 0 0 [] 12 lco (*Ajoute Couleur ou QuinteFlush*)
+	   in let liste_rang = list_rank l
+	      in let final_list = list_comb 12 (carteHauteAdd liste_rang lp) 0 l liste_rang(*Ajoute CarteHaute*)
+		 in doubleAndFull final_list final_list liste_rang (*Ajoute DoublePaire ou Full*)
 ;;
 
 (* retourne la combinaison maximale de la liste (on suppose qu'il y a au moins 1 élément dans la liste) *)
@@ -532,7 +535,7 @@ let make_card_with_string string =
   |_ -> char_to_color (String.get string 1)
        in Carte(Valeur(valeur),color)
   with
-    |Invalid_argument "Mauvaise string" -> raise(SYNTAXE_ERROR)
+    |Invalid_argument _ -> raise(SYNTAXE_ERROR)
 ;;
 
 let make_donne line =

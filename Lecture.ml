@@ -13,7 +13,7 @@ let lecture_de_fichier file =
       	in match proba_d with
         	|(1.0,0.0) -> print_endline("Le joueur 1 est gagnant.")
         	|(0.0,1.0) -> print_endline("Le joueur 2 est gagnant.")
-			|(0.5,0.5) -> print_endline("EgalitÃ©.")
+			|(0.5,0.5) -> print_endline("Egalité.")
         	|(p1,p2) -> print_string("Joueur 1: ");
           				print_float(p1);
           				print_newline();
@@ -24,7 +24,7 @@ let lecture_de_fichier file =
       | End_of_file | SYNTAXE_ERROR -> failwith("Erreur de fichier")
 
 let () = 
-let t = Sys.time() in
-let t2 = lecture_de_fichier Sys.argv.(1) in
-Printf.printf "Execution time: %fs\n" (Sys.time() -. t)
+  let t = Sys.time() in
+  lecture_de_fichier Sys.argv.(1);
+  Printf.printf "Execution time: %fs\n" (Sys.time() -. t)
 ;;
