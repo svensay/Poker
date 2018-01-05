@@ -1,15 +1,9 @@
-(* #load "graphics.cma";; *)
 open Graphics;;
 open Poker;;
 
 open_graph " 500x500";;
 let w = 500;;
 let h = 500;;
-
-(*pour draw_all_card ()
-open_graph " 600x650";;
-let w = 600;;
-let h = 650;;*)
 
 let color_to_string color = match color with
   | Pique -> "p"
@@ -34,7 +28,6 @@ let rank_to_string rank = match rank with
   | 2 -> "2"
   |_ -> failwith("Mauvaise valeur de rang");
 ;;
-
 
 let draw_card carte x y =
   draw_rect x y 25 40;
@@ -65,7 +58,7 @@ let draw_proba_double d1 d2 t = moveto 0 200;lineto w 200;
 	in match proba_d with
 	  |(1.0,0.0) -> moveto 150 150;draw_string "Le joueur 1 est gagnant."
 	  |(0.0,1.0) -> moveto 150 150;draw_string "Le joueur 2 est gagnant."
-	  |(0.5,0.5) -> moveto 150 150;draw_string "Egalité"
+	  |(0.5,0.5) -> moveto 150 150;draw_string "Egalite"
 	  |(p1,p2) ->moveto 150 150;
 	    draw_string "Joueur 1 :";
 	    moveto 250 150;
@@ -96,7 +89,7 @@ let rec read_d1 () =
        let d1 = make_donne d1_string
        in draw_d1 d1; d1
     with
-      |SYNTAXE_ERROR -> print_string("Mauvaise entrer pour la donne 1, veuillez réessayer :"); read_d1 ()
+      |SYNTAXE_ERROR -> print_string("Mauvaise entree pour la donne 1, veuillez reessayer :"); read_d1 ()
 ;;
 
 let rec read_d2 () =
@@ -107,7 +100,7 @@ let rec read_d2 () =
 	 |_ -> let d2 = make_donne d2_string
 	       in draw_d2 d2; Some d2
     with
-      |SYNTAXE_ERROR -> print_string("Mauvaise entrer pour la donne 2, veuillez réessayer :"); read_d2 ()
+      |SYNTAXE_ERROR -> print_string("Mauvaise entree pour la donne 2, veuillez reessayer :"); read_d2 ()
 ;;
 
 let rec read_tab () = 
@@ -116,11 +109,11 @@ let rec read_tab () =
        let t = make_table t_string
        in draw_table t;t
     with
-      |SYNTAXE_ERROR -> print_string("Mauvaise entrer pour la table, veuillez réessayer :"); read_tab ()
+      |SYNTAXE_ERROR -> print_string("Mauvaise entree pour la table, veuillez reessayer :"); read_tab ()
 ;;
 
 let affichage () =
-  print_string("Veuillez entrer la 1er donne: ");
+  print_string("Veuillez entrer la 1ere donne: ");
   let d1 = read_d1 () 
   in print_string("Veuillez entrer la 2eme donne: ");
   let d2_option = read_d2 ()
@@ -134,30 +127,6 @@ let affichage () =
       draw_proba_double d1 d2 t  
 ;;
 
-(*let rec draw_line_card x y list_card list_coord_card =  match list_card with
-    |h::t ->  draw_card h x y;draw_line_card x (y-45) t ((x,y)::list_coord_card)
-    |[] -> list_coord_card
-;;
-
-let draw_all_card () =
-  let trefle = make_card_with_one_color Trefle (make_list_value 12 []) []
-  and coeur = make_card_with_one_color Coeur (make_list_value 12 []) []
-  and pique = make_card_with_one_color Pique (make_list_value 12 []) []
-  and carreau = make_card_with_one_color Carreau (make_list_value 12 []) []
-  in let trefle_coord = draw_line_card (w-45) (h-80) trefle []
-  and coeur_coord = draw_line_card (w-90) (h-80) coeur []
-  and pique_coord = draw_line_card (w-135) (h-80) pique []
-  and carreau_coord = draw_line_card (w-180) (h-80) carreau []
-     in let rec loop () =
-	  let eve = wait_next_event [Button_down]
-	  in if eve.button then
-	      match (eve.mouse_x,eve.mouse_y) with
-		|(x,y) -> print_int x; print_string " ";print_int y;loop ()
-		|_ -> loop ()
-	    else loop ()
-	in loop ()	
-;;*)
-
 let rec loop() =
   affichage ();print_string("Voulez vous une autre configuration (y\\n) : ");
   let rec answers () =
@@ -165,7 +134,7 @@ let rec loop() =
     in match repeat with
       |"y" -> clear_graph ();loop()
       |"n" -> close_graph ()
-      | _ -> print_string("Mauvaise reponse r?sayer (y\\n) : ");answers ()
+      | _ -> print_string("Mauvaise reponse reesayer (y\\n) : ");answers ()
   in answers ()
   
 ;;

@@ -1,0 +1,14 @@
+Anthony GARCIA - Sven SAY
+
+Compilation du code source: make
+
+Exécution des fichiers tests: ./compute [fichierTest]
+	Exemple: ./compute tests_poker/test_22.txt
+
+Lancement de l'interface graphique: ./interfaceG et suivre les instructions sur le terminal, les données sont à entrer au même format que les fichiers de tests fournis, l'affichage s'effectue dans la fenêtre qui s'ouvre
+	Exemple d'éxécution: ./interfaceG 
+		Veuillez entrer la 1ère donne: 6co 2p
+		Veuillez entrer la 2eme donne: ?
+		Veuillez entrer la table: At 4co Vp
+		Voulez vous une autre configuration (y\n) : n
+ Répondre "y" à la question permet de recommencer avec d'autres valeurs et répondre "n" arrête le programme.
